@@ -16,11 +16,11 @@ public class DecisionTreeTest extends AbstractWekaTest {
     @Test
     public void testJ48() throws Exception {
         
-        DataSource source = new DataSource("data/labor.arff");   
+        DataSource source = new DataSource("data/sfny.arff");   
         Instances dataset = source.getDataSet();
         
         // Setting class attribute 
-        dataset.setClassIndex(dataset.numAttributes() - 1);
+        dataset.setClass(dataset.attribute("in_sf"));
 
         // Split the dataset in train/test data
         Instances train = dataset.trainCV(5, 0);

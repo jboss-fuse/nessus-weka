@@ -20,9 +20,10 @@
     </scm>
     
     <properties>
+        <version.apache.camel>3.0.1</version.apache.camel>
+        <version.waikato.weka>3.8.5-SNAPSHOT</version.waikato.weka>
         <version.junit>4.11</version.junit>
         <version.slf4j>1.7.28</version.slf4j>
-        <version.weka>3.8.4</version.weka>
         
         <!-- Plugin versions -->
         <version-buildnumber-maven-plugin>1.4</version-buildnumber-maven-plugin>
@@ -44,10 +45,25 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-core</artifactId>
+                <version>${version.apache.camel}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-main</artifactId>
+                <version>${version.apache.camel}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-undertow</artifactId>
+                <version>${version.apache.camel}</version>
+            </dependency>
 			<dependency>
 			    <groupId>nz.ac.waikato.cms.weka</groupId>
 			    <artifactId>weka-stable</artifactId>
-			    <version>${version.weka}</version>
+			    <version>${version.waikato.weka}</version>
 			</dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
