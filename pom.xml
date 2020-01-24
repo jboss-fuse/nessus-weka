@@ -40,6 +40,7 @@
     
     <modules>
         <module>api</module>
+        <module>camel</module>
         <module>part01</module>
     </modules>
 
@@ -48,11 +49,6 @@
             <dependency>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-core</artifactId>
-                <version>${version.apache.camel}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-main</artifactId>
                 <version>${version.apache.camel}</version>
             </dependency>
             <dependency>

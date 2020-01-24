@@ -1,15 +1,11 @@
 package io.nessus.weka.test.part01;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.nessus.weka.testing.AbstractWekaTest;
 import io.nessus.weka.utils.DatasetUtils;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class DatasetReadWriteTest extends AbstractWekaTest {
@@ -17,11 +13,8 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
     @Test
     public void testDatasetRead() throws Exception {
         
-        DataSource source = new DataSource("data/iris.arff");   
-        Instances structure = source.getStructure();
-        Instances dataset = source.getDataSet();
-        
-        Assert.assertEquals(5, structure.numAttributes());
+        Instances dataset = DatasetUtils.readDataset("data/iris.arff");
+        Assert.assertEquals(5, dataset.numAttributes());
         Assert.assertEquals(150, dataset.numInstances());
     }
     
@@ -39,8 +32,7 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
     @Test
     public void testDatasetWrite() throws Exception {
         
-        DataSource source = new DataSource("data/sfny.csv"); 
-        Instances dataset = source.getDataSet();
+        Instances dataset = DatasetUtils.readDataset("data/sfny.csv");
 
         // Convert the 'in_sf' attribute to nominal
         dataset = DatasetUtils.applyFilter(dataset, "NumericToNominal", "-R first");
@@ -50,7 +42,6 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
         
         dataset.setRelationName("sfny");
         
-        Path outpath = Paths.get("target/sfny.arff");
-        DataSink.write(outpath.toString(), dataset);
+        DatasetUtils.writeDataset(dataset, "target/sfny.arff");
     }
 }

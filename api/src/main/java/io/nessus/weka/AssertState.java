@@ -32,15 +32,15 @@ public final class AssertState {
      * Throws an IllegalStateException when the given value is null.
      * @return the value
      */
-    public static <T> T isNotNull(T value) {
-        return isNotNull(value, "Null value");
+    public static <T> T notNull(T value) {
+        return notNull(value, "Null value");
     }
 
     /**
      * Throws an IllegalStateException when the given value is null.
      * @return the value
      */
-    public static <T> T isNotNull(T value, String message) {
+    public static <T> T notNull(T value, String message) {
         if (value == null)
             throw new IllegalStateException(message);
         return value;
@@ -90,8 +90,8 @@ public final class AssertState {
      * Throws an IllegalStateException when the given values are not equal.
      */
     public static <T> T isEqual(T exp, T was, String message) {
-        isNotNull(exp, message);
-        isNotNull(was, message);
+        notNull(exp, message);
+        notNull(was, message);
         isTrue(exp.equals(was), message);
         return was;
     }
@@ -107,8 +107,8 @@ public final class AssertState {
      * Throws an IllegalStateException when the given values are not the same.
      */
     public static <T> T isSame(T exp, T was, String message) {
-        isNotNull(exp, message);
-        isNotNull(was, message);
+        notNull(exp, message);
+        notNull(was, message);
         isTrue(exp == was, message);
         return was;
     }

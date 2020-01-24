@@ -1,5 +1,6 @@
 package io.nessus.weka.utils;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +11,8 @@ import io.nessus.weka.AssertState;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSink;
+import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 
 public class DatasetUtils {
@@ -18,8 +21,25 @@ public class DatasetUtils {
     private DatasetUtils() {
     }
     
+    public static Instances readDataset(Path inpath) throws Exception {
+        return readDataset(inpath.toString());
+    }
+    
+    public static Instances readDataset(String inpath) throws Exception {
+        DataSource source = new DataSource(inpath); 
+        return source.getDataSet();
+    }
+    
+    public static void writeDataset(Instances dataset, Path outpath) throws Exception {
+        DataSink.write(outpath.toString(), dataset);
+    }
+    
+    public static void writeDataset(Instances dataset, String outpath) throws Exception {
+        DataSink.write(outpath, dataset);
+    }
+    
     public static Instances applyFilter(Instances dataset, String filterName, String options) throws Exception {
-        return applyFilter(dataset, filterName, options.split(" "));
+        return applyFilter(dataset, filterName, optionsNotNull(options).split(" "));
     }
 
     public static Instances applyFilter(Instances dataset, String filterName, String[] options) throws Exception {
@@ -31,7 +51,7 @@ public class DatasetUtils {
     }
 
     public static Classifier buildClassifier(Instances dataset, String classifierName, String options) throws Exception {
-        return buildClassifier(dataset, classifierName, options.split(" "));
+        return buildClassifier(dataset, classifierName, optionsNotNull(options).split(" "));
     }
 
     public static Classifier buildClassifier(Instances dataset, String classifierName, String[] options) throws Exception {
@@ -46,6 +66,10 @@ public class DatasetUtils {
         return evaluation;
     }
     
+    private static String optionsNotNull(String options) {
+        return options != null ? options : "";
+    }
+
     @SuppressWarnings("unchecked")
     private static <T extends Object> T loadInstance(String name, Class<T> type) {
         
