@@ -3,14 +3,12 @@ package io.nessus.weka.test.part01;
 import org.junit.Test;
 
 import io.nessus.weka.testing.AbstractWekaTest;
+import io.nessus.weka.utils.DatasetUtils;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-/**
- * https://weka.sourceforge.io/doc.stable-3-8/weka/classifiers/trees/J48.html
- */
 public class DecisionTreeTest extends AbstractWekaTest {
     
     @Test
@@ -22,23 +20,12 @@ public class DecisionTreeTest extends AbstractWekaTest {
         // Setting class attribute 
         dataset.setClass(dataset.attribute("in_sf"));
 
-        // Split the dataset in train/test data
-        Instances train = dataset.trainCV(5, 0);
-        Instances test = dataset.testCV(5, 0);
-        
-        logInfo("All Instances: {}", dataset.size());
-        logInfo("Train with: {}", train.size());
-        logInfo("Test with: {}", test.size());
-        
-        J48 tree = new J48();
-        tree.setUnpruned(false);
-        tree.buildClassifier(train);
+        // Build the J48 classifier
+        Classifier classifier = DatasetUtils.buildClassifier(dataset, "J48", "");
+        logInfo("{}", classifier);
 
-        // Print tree
-        logInfo("{}", tree);
-
-        Evaluation eval = new Evaluation(train);
-        eval.evaluateModel(tree, test);
+        // Evaluate with 10 fold cross validation
+        Evaluation eval = DatasetUtils.crossValidateModel(classifier, dataset, 10, 1);
         logInfo(eval.toSummaryString(false));
     }
 }
