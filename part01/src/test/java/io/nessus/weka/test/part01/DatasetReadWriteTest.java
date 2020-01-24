@@ -2,7 +2,6 @@ package io.nessus.weka.test.part01;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,12 +39,18 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
     @Test
     public void testDatasetWrite() throws Exception {
         
-        DataSource source = new DataSource("data/sfny.csv");   
+        DataSource source = new DataSource("data/sfny.csv"); 
         Instances dataset = source.getDataSet();
 
-        DatasetUtils.convertToNominal(dataset, "in_sf", Arrays.asList("0", "1"));
+        // Convert the 'in_sf' attribute to nominal
+        dataset = DatasetUtils.applyFilter(dataset, "NumericToNominal", "-R first");
         
-        Path outpath = Paths.get("data/sfny.arff");
+        // Move the 'in_sf' attribute to the end
+        dataset = DatasetUtils.applyFilter(dataset, "Reorder", "-R 2-last,1");
+        
+        dataset.setRelationName("sfny");
+        
+        Path outpath = Paths.get("target/sfny.arff");
         DataSink.write(outpath.toString(), dataset);
     }
 }

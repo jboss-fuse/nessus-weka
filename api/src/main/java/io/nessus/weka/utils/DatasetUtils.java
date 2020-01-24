@@ -1,10 +1,13 @@
 package io.nessus.weka.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import weka.core.Attribute;
-import weka.core.Instance;
+import io.nessus.weka.AssertState;
 import weka.core.Instances;
+import weka.filters.Filter;
 
 public class DatasetUtils {
 
@@ -12,33 +15,47 @@ public class DatasetUtils {
     private DatasetUtils() {
     }
     
-    public static void convertToNominal(Instances dataset, String name, List<String> nomvals) {
+    public static Instances applyFilter(Instances dataset, String filterName, String options) throws Exception {
+        return applyFilter(dataset, filterName, options.split(" "));
+    }
 
-        // Use the same index position
-        int idx = dataset.attribute(name).index();
-        
-        // Rename the numerical attribute
-        String rename = "org" + name;
-        dataset.renameAttribute(dataset.attribute(name), rename);
-        
-        // Insert the replacment nominal attribute
-        Attribute nomatt = new Attribute(name, nomvals);
-        dataset.insertAttributeAt(nomatt, idx);
+    public static Instances applyFilter(Instances dataset, String filterName, String[] options) throws Exception {
+        Filter filter = loadFilter(filterName);
+        filter.setInputFormat(dataset);
+        filter.setOptions(options);
+        dataset = Filter.useFilter(dataset, filter);
+        return dataset;
+    }
 
-        // Convert numerical to nominal values
-        Attribute numatt = dataset.attribute(rename);
-        for (int i = 0; i < dataset.numInstances(); i++) {
-            Instance inst = dataset.instance(i);
-            if (numatt.isNumeric()) {
-                Integer val = (int) inst.value(numatt);
-                inst.setValue(idx, val.toString());
-            } else {
-                String val = inst.stringValue(numatt);
-                inst.setValue(idx, val);
+    private static Filter loadFilter(String filterName) {
+        
+        List<String> filterPackages = Arrays.asList(
+                "weka.filters.supervised.attribute",
+                "weka.filters.supervised.instance",
+                "weka.filters.unsupervised.attribute",
+                "weka.filters.unsupervised.instance",
+                "weka.filters");
+        
+        List<Filter> filters = new ArrayList<>();
+        
+        for (String packageName : filterPackages) {
+            ClassLoader loader = Filter.class.getClassLoader();
+            try {
+                Class<?> filterClass = loader.loadClass(packageName + "." + filterName);
+                Filter filter = (Filter) filterClass.newInstance();
+                filters.add(filter);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                // ignore
             }
         }
         
-        // Delete the numerical attribute 
-        dataset.deleteAttributeAt(numatt.index());
+        List<String> filterNames = filters.stream()
+                .map(f -> f.getClass().getName())
+                .collect(Collectors.toList());
+        
+        AssertState.isFalse(filterNames.isEmpty(), "Cannot obtain filter for name: " + filterName);
+        AssertState.isEqual(1, filterNames.size(), "Ambiguous filter name: " + filterNames);
+        
+        return filters.get(0);
     }
 }
