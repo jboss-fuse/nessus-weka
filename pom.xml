@@ -26,6 +26,7 @@
         <version.slf4j>1.7.28</version.slf4j>
         
         <!-- Plugin versions -->
+        <version-asciidoctor-maven-plugin>1.5.7.1</version-asciidoctor-maven-plugin>
         <version-buildnumber-maven-plugin>1.4</version-buildnumber-maven-plugin>
         <version-docker-maven-plugin>0.27.2</version-docker-maven-plugin>
         <version-license-maven-plugin>1.16</version-license-maven-plugin>
@@ -35,13 +36,13 @@
         <version-maven-javadoc-plugin>3.0.1</version-maven-javadoc-plugin>
         <version-maven-release-plugin>2.5</version-maven-release-plugin>
         <version-maven-surefire-plugin>2.19.1</version-maven-surefire-plugin>
-        <version-markdown-plugin>2.1.0</version-markdown-plugin>
     </properties>
     
     <modules>
         <module>api</module>
         <module>camel</module>
         <module>part01</module>
+        <module>docs</module>
     </modules>
 
     <dependencyManagement>
@@ -83,6 +84,11 @@
         <!-- Plugin Management -->
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.ruleoftech</groupId>
+                    <artifactId>markdown-page-generator-plugin</artifactId>
+                    <version>${version-markdown-plugin}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -130,6 +136,11 @@
                     <configuration>
                         <failIfNoTests>false</failIfNoTests>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.asciidoctor</groupId>
+                    <artifactId>asciidoctor-maven-plugin</artifactId>
+                    <version>${version-asciidoctor-maven-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

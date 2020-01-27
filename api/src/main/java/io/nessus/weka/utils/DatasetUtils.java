@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import io.nessus.weka.AssertState;
+import io.nessus.weka.CheckedException;
+import io.nessus.weka.Operator;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -21,49 +23,77 @@ public class DatasetUtils {
     private DatasetUtils() {
     }
     
-    public static Instances readDataset(Path inpath) throws Exception {
-        return readDataset(inpath.toString());
+    public static Instances read(Path inpath) {
+        return read(inpath.toString());
     }
     
-    public static Instances readDataset(String inpath) throws Exception {
-        DataSource source = new DataSource(inpath); 
-        return source.getDataSet();
+    public static Instances read(String inpath) {
+        try {
+            DataSource source = new DataSource(inpath); 
+            return source.getDataSet();
+        } catch (Exception ex) {
+            throw CheckedException.create(ex);
+        }
     }
     
-    public static void writeDataset(Instances dataset, Path outpath) throws Exception {
-        DataSink.write(outpath.toString(), dataset);
+    public static void write(Instances dataset, Path outpath) {
+        write(dataset, outpath.toString());
     }
     
-    public static void writeDataset(Instances dataset, String outpath) throws Exception {
-        DataSink.write(outpath, dataset);
+    public static void write(Instances dataset, String outpath) {
+        try {
+            DataSink.write(outpath, dataset);
+        } catch (Exception ex) {
+            throw CheckedException.create(ex);
+        }
     }
     
-    public static Instances applyFilter(Instances dataset, String filterName, String options) throws Exception {
-        return applyFilter(dataset, filterName, optionsNotNull(options).split(" "));
+    public static Instances applyFilter(Instances dataset, String spec) {
+        return applyFilter(dataset, new Operator(spec));
     }
 
-    public static Instances applyFilter(Instances dataset, String filterName, String[] options) throws Exception {
-        Filter filter = loadInstance(filterName, Filter.class);
-        filter.setInputFormat(dataset);
-        filter.setOptions(options);
-        dataset = Filter.useFilter(dataset, filter);
-        return dataset;
+    public static Instances applyFilter(Instances dataset, String name, String options) {
+        return applyFilter(dataset, new Operator(name, options));
     }
 
-    public static Classifier buildClassifier(Instances dataset, String classifierName, String options) throws Exception {
+    public static Instances applyFilter(Instances dataset, Operator spec) {
+        return applyFilter(dataset, spec.getName(), spec.getOptions());
+    }
+
+    public static Instances applyFilter(Instances dataset, String name, String[] options) {
+        try {
+            Filter filter = loadInstance(name, Filter.class);
+            filter.setInputFormat(dataset);
+            filter.setOptions(options);
+            dataset = Filter.useFilter(dataset, filter);
+            return dataset;
+        } catch (Exception ex) {
+            throw CheckedException.create(ex);
+        }
+    }
+
+    public static Classifier buildClassifier(Instances dataset, String classifierName, String options) {
         return buildClassifier(dataset, classifierName, optionsNotNull(options).split(" "));
     }
 
-    public static Classifier buildClassifier(Instances dataset, String classifierName, String[] options) throws Exception {
-        Classifier classifier = loadInstance(classifierName, Classifier.class);
-        classifier.buildClassifier(dataset);
-        return classifier;
+    public static Classifier buildClassifier(Instances dataset, String classifierName, String[] options) {
+        try {
+            Classifier classifier = loadInstance(classifierName, Classifier.class);
+            classifier.buildClassifier(dataset);
+            return classifier;
+        } catch (Exception ex) {
+            throw CheckedException.create(ex);
+        }
     }
 
-    public static Evaluation crossValidateModel(Classifier classifier, Instances dataset, int numFolds, int seed) throws Exception {
-        Evaluation evaluation = new Evaluation(dataset);
-        evaluation.crossValidateModel(classifier, dataset, numFolds, new Random(seed));
-        return evaluation;
+    public static Evaluation crossValidateModel(Classifier classifier, Instances dataset, int numFolds, int seed) {
+        try {
+            Evaluation evaluation = new Evaluation(dataset);
+            evaluation.crossValidateModel(classifier, dataset, numFolds, new Random(seed));
+            return evaluation;
+        } catch (Exception ex) {
+            throw CheckedException.create(ex);
+        }
     }
     
     private static String optionsNotNull(String options) {
@@ -88,7 +118,7 @@ public class DatasetUtils {
         List<T> instances = new ArrayList<>();
         
         for (String packageName : packages) {
-            ClassLoader loader = Filter.class.getClassLoader();
+            ClassLoader loader = type.getClassLoader();
             try {
                 Class<?> clazz = loader.loadClass(packageName + "." + name);
                 T filter = (T) clazz.newInstance();

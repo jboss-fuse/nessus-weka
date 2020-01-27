@@ -17,7 +17,6 @@
 package io.nessus.weka.camel;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -121,15 +120,21 @@ public class WekaProducer extends DefaultProducer {
         }
         
         if (outpath != null) {
+            
             File outFile = Paths.get(outpath).toFile();
             outFile.getParentFile().mkdirs();
             DataSink.write(outpath, dataset);
             return dataset;
+            
         } else {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DataSink.write(baos, dataset);
-            InputStream input = new ByteArrayInputStream(baos.toByteArray());
-            return input;
+            
+            // The internal implementation of DataSink does this.. 
+            // Instances.toString().getBytes()
+            //
+            // Therefore, we avoid creating yet another copy of the
+            // instance data and call Instances.toString() as well 
+            byte[] bytes = dataset.toString().getBytes();
+            return new ByteArrayInputStream(bytes);
         }
     }
 

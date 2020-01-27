@@ -143,7 +143,7 @@ public class ReadWriteTest {
             producer.sendBody("direct:start", dataset);
             
             Path inpath = Paths.get("target/data/sfny.arff");
-            dataset = DatasetUtils.readDataset(inpath);
+            dataset = DatasetUtils.read(inpath);
             Assert.assertNotNull(dataset);
         }
     }

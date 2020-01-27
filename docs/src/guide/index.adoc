@@ -1,0 +1,27 @@
+= Nessus Weka
+Thomas Diesler
+:revnumber: {version}
+:revdate: {localdate}
+:toc: left
+:icons: font
+:imagesdir: img
+:linkattrs:
+:sectnums:
+
+:scm-root: https://github.com/tdiesler/nessus-weka
+:java-api: {scm-root}/api/src/main/java
+:data-part01: {scm-root}/part01/data
+
+(C) 2020 The original authors.
+
+Welcome to Nessus Weka. This is a collection of examples and tutorials related to the https://www.cs.waikato.ac.nz/ml/weka[Weka,window=_blank] data mining toolset.
+
+We show you how to get started with simple data mining tasks and how to incorporate these into larger integration workflows.
+
+include::getting-weka/index.adoc[]
+include::data-inout/index.adoc[]
+
+// include::classification/index.adoc[]
+// include::regression/index.adoc[]
+// include::boosting/index.adoc[]
+

@@ -1,0 +1,24 @@
+
+## Getting Weka
+
+Weka download and install instructions are https://waikato.github.io/weka-wiki/downloading_weka[here,window=_blank].
+
+When you open Weka, you'll initially see two windows.
+
+The Weka Chooser
+
+image::getting-weka/weka-chooser.png[Weka Chooser,50%]
+
+and the Weka Explorer
+
+image::getting-weka/weka-explorer.png[Weka Explorer]
+
+Following on from here, we mostly explore how to do data mining tasks in Java APIs and in https://camel.apache.org[Apache Camel,window=_blank] workflows. 
+
+However, it is Weka that is the source of incredibly comprehensive and powerful data mining functionality. 
+You may find, once you are more familiar with it, that Java APIs and Camel workflows become an afterthought of what you have decided on using the Weka tools. 
+
+This isn't so much a limitation of Nessus/Camel APIs but quite intentional.
+In Nessus, we aim to provide entry points that are general enough to access the full scope of Weka functionality.
+
+Without further ado, lets do it ...    
