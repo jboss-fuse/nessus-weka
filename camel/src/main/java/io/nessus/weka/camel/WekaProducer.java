@@ -18,6 +18,7 @@ package io.nessus.weka.camel;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -31,8 +32,11 @@ import io.nessus.weka.AssertState;
 import io.nessus.weka.camel.WekaConfiguration.Command;
 import io.nessus.weka.utils.DatasetUtils;
 import weka.core.Instances;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.converters.Loader;
 
 public class WekaProducer extends DefaultProducer {
 
@@ -100,9 +104,35 @@ public class WekaProducer extends DefaultProducer {
             dataset = source.getDataSet();
             
         } else if (body instanceof InputStream) {
+            
             InputStream input = (InputStream) body;
-            DataSource source = new DataSource(input); 
-            dataset = source.getDataSet();
+            if (input.markSupported()) {
+                input.mark(256);
+            }
+            
+            // First try .arff
+            try {
+                Loader loader = new ArffLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                dataset = loader.getDataSet();
+            } catch (IOException ex) {
+                String exmsg = ex.getMessage();
+                if (!exmsg.contains("Unable to determine structure as arff")) {
+                    throw ex;
+                }
+                if (input.markSupported()) {
+                    input.reset();
+                }
+            }
+            
+            // Next try .csv
+            if (dataset == null) {
+                Loader loader = new CSVLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                dataset = loader.getDataSet();
+            }
         }
         
         AssertState.notNull(dataset, "Cannot create dataset from: " + body);

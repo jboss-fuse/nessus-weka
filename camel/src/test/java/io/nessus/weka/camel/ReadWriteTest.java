@@ -27,7 +27,6 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import io.nessus.weka.utils.DatasetUtils;
@@ -98,8 +97,7 @@ public class ReadWriteTest {
     }
     
     @Test
-    @Ignore
-    public void readArffInputStream() throws Exception {
+    public void readCSVInputStream() throws Exception {
 
         try (CamelContext camelctx = new DefaultCamelContext()) {
             
@@ -112,6 +110,28 @@ public class ReadWriteTest {
             camelctx.start();
             
             Path absPath = Paths.get("src/test/resources/data/sfny.csv").toAbsolutePath();
+            InputStream input = absPath.toUri().toURL().openStream();
+            
+            ProducerTemplate producer = camelctx.createProducerTemplate();
+            Instances dataset = producer.requestBody("direct:start", input, Instances.class);
+            Assert.assertNotNull(dataset);
+        }
+    }
+
+    @Test
+    public void readARFFInputStream() throws Exception {
+
+        try (CamelContext camelctx = new DefaultCamelContext()) {
+            
+            camelctx.addRoutes(new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from("direct:start").to("weka:read");
+                }
+            });
+            camelctx.start();
+            
+            Path absPath = Paths.get("src/test/resources/data/sfny.arff").toAbsolutePath();
             InputStream input = absPath.toUri().toURL().openStream();
             
             ProducerTemplate producer = camelctx.createProducerTemplate();
