@@ -52,8 +52,8 @@ public class DatasetUtils {
     public static Instances applyFilter(Instances instances, OperatorSpec spec) {
         try {
             Filter filter = loadInstance(spec.getName(), Filter.class);
-            filter.setInputFormat(instances);
             filter.setOptions(spec.getOptions());
+            filter.setInputFormat(instances);
             instances = Filter.useFilter(instances, filter);
             return instances;
         } catch (Exception ex) {

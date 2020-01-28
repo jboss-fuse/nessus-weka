@@ -84,77 +84,21 @@ public class WekaProducer extends DefaultProducer {
 
     private Instances handleReadCmd(Exchange exchange) throws Exception {
         
-        Message msg = exchange.getMessage();
-        Object body = msg.getBody();
-        
-        Instances dataset = null;
-        
-        if (body instanceof GenericFile) {
-            
-            GenericFile<?> file = (GenericFile<?>) body;
-            AssertState.isFalse(file.isDirectory(), "Directory not supported: " + file);
-            String absolutePath = file.getAbsoluteFilePath();
-            DataSource source = new DataSource(absolutePath); 
-            dataset = source.getDataSet();
-            
-        } else if (body instanceof URL) {
-            
-            URL url = (URL) body;
-            DataSource source = new DataSource(url.toExternalForm()); 
-            dataset = source.getDataSet();
-            
-        } else if (body instanceof InputStream) {
-            
-            InputStream input = (InputStream) body;
-            if (input.markSupported()) {
-                input.mark(256);
-            }
-            
-            // First try .arff
-            try {
-                Loader loader = new ArffLoader();
-                loader.setSource(input);
-                loader.getStructure();
-                dataset = loader.getDataSet();
-            } catch (IOException ex) {
-                String exmsg = ex.getMessage();
-                if (!exmsg.contains("Unable to determine structure as arff")) {
-                    throw ex;
-                }
-                if (input.markSupported()) {
-                    input.reset();
-                }
-            }
-            
-            // Next try .csv
-            if (dataset == null) {
-                Loader loader = new CSVLoader();
-                loader.setSource(input);
-                loader.getStructure();
-                dataset = loader.getDataSet();
-            }
-        }
-        
-        AssertState.notNull(dataset, "Cannot create dataset from: " + body);
-        return dataset;
+        Instances instances = assertInstancesBody(exchange);
+        return instances;
     }
 
     private Object handleWriteCmd(Exchange exchange) throws Exception {
         
-        Instances dataset = assertInstancesBody(exchange);
+        Instances instances = assertInstancesBody(exchange);
         String outpath = getConfiguration().getOutPath();
-        
-        String relation = getConfiguration().getRelation();
-        if (relation != null) {
-            dataset.setRelationName(relation);
-        }
         
         if (outpath != null) {
             
             File outFile = Paths.get(outpath).toFile();
             outFile.getParentFile().mkdirs();
-            DataSink.write(outpath, dataset);
-            return dataset;
+            DataSink.write(outpath, instances);
+            return instances;
             
         } else {
             
@@ -163,7 +107,7 @@ public class WekaProducer extends DefaultProducer {
             //
             // Therefore, we avoid creating yet another copy of the
             // instance data and call Instances.toString() as well 
-            byte[] bytes = dataset.toString().getBytes();
+            byte[] bytes = instances.toString().getBytes();
             return new ByteArrayInputStream(bytes);
         }
     }
@@ -173,16 +117,69 @@ public class WekaProducer extends DefaultProducer {
         String name = getConfiguration().getName();
         String options = getConfiguration().getOptions();
         AssertState.notNull(name, "Cannot obtain filter name from: " + getEndpoint().getEndpointUri());
-        Instances dataset = assertInstancesBody(exchange);
+        Instances instances = assertInstancesBody(exchange);
         
-        dataset = DatasetUtils.applyFilter(dataset, new DatasetUtils.OperatorSpec(name, options));
-        return dataset;
+        instances = DatasetUtils.applyFilter(instances, new DatasetUtils.OperatorSpec(name, options));
+        return instances;
     }
 
-    private Instances assertInstancesBody(Exchange exchange) {
+    private Instances assertInstancesBody(Exchange exchange) throws Exception {
+        
         Message msg = exchange.getMessage();
-        Instances dataset = msg.getBody(Instances.class);
-        AssertState.notNull(dataset, "Cannot obtain dataset from body: " + msg.getBody());
-        return dataset;
+        Object body = msg.getBody();
+        
+        Instances instances = msg.getBody(Instances.class);
+        
+        if (instances == null) {
+            
+            if (body instanceof GenericFile) {
+                
+                GenericFile<?> file = (GenericFile<?>) body;
+                AssertState.isFalse(file.isDirectory(), "Directory not supported: " + file);
+                String absolutePath = file.getAbsoluteFilePath();
+                DataSource source = new DataSource(absolutePath); 
+                instances = source.getDataSet();
+                
+            } else if (body instanceof URL) {
+                
+                URL url = (URL) body;
+                DataSource source = new DataSource(url.toExternalForm()); 
+                instances = source.getDataSet();
+                
+            } else if (body instanceof InputStream) {
+                
+                InputStream input = (InputStream) body;
+                if (input.markSupported()) {
+                    input.mark(256);
+                }
+                
+                // First try .arff
+                try {
+                    Loader loader = new ArffLoader();
+                    loader.setSource(input);
+                    loader.getStructure();
+                    instances = loader.getDataSet();
+                } catch (IOException ex) {
+                    String exmsg = ex.getMessage();
+                    if (!exmsg.contains("Unable to determine structure as arff")) {
+                        throw ex;
+                    }
+                    if (input.markSupported()) {
+                        input.reset();
+                    }
+                }
+                
+                // Next try .csv
+                if (instances == null) {
+                    Loader loader = new CSVLoader();
+                    loader.setSource(input);
+                    loader.getStructure();
+                    instances = loader.getDataSet();
+                }
+            }
+        }
+        
+        AssertState.notNull(instances, "Cannot obtain instances from body: " + body);
+        return instances;
     }
 }

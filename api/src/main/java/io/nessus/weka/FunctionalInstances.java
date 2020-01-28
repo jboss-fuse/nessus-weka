@@ -3,50 +3,49 @@ package io.nessus.weka;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import weka.core.Instances;
 
-public interface FunctionalInstances<T> extends Supplier<T> {
+public interface FunctionalInstances {
 
-    T read(URL url);
+    Dataset read(URL url);
     
-    T read(Path inpath);
+    Dataset read(Path inpath);
     
-    T read(String inpath);
+    Dataset read(String inpath);
     
-    T rename(String name);
-    
-    T write(Path outpath);
+    Dataset write(Path outpath);
 
-    T write(String outpath);
+    Dataset write(String outpath);
 
-    T push();
+    Dataset push();
     
-    T pushTrainingSet();
+    Dataset pushTrainingSet();
     
-    T pushTestSet();
+    Dataset pushTestSet();
     
-    T push(String name);
+    Dataset push(String name);
     
-    T pop();
+    Dataset pop();
     
-    T popTrainingSet();
+    Dataset popTrainingSet();
     
-    T popTestSet();
+    Dataset popTestSet();
     
-    T pop(String name);
+    Dataset pop(String name);
     
-    T apply(String filterSpec);
+    Dataset filter(String filterSpec);
 
-    T applyToFunctionalInstances(UnaryOperator<FunctionalInstances<T>> operator);
+    FunctionalClassifier classifier(String classifierSpec);
+    
+    Dataset applyToFunctionalInstances(UnaryOperator<FunctionalInstances> operator);
 
-    T applyToInstances(UnaryOperator<Instances> operator);
+    Dataset applyToInstances(UnaryOperator<Instances> operator);
 
-    T consumeFunctionalInstances(Consumer<FunctionalInstances<T>> consumer);
+    Dataset consumeFunctionalInstances(Consumer<FunctionalInstances> consumer);
 
-    T consumeInstances(Consumer<Instances> consumer);
+    Dataset consumeInstances(Consumer<Instances> consumer);
     
     Instances getInstances();
 }

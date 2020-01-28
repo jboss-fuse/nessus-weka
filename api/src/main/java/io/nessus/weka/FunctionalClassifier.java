@@ -5,7 +5,7 @@ import java.util.function.UnaryOperator;
 
 import weka.classifiers.Classifier;
 
-public interface FunctionalClassifier extends FunctionalInstances<Dataset> {
+public interface FunctionalClassifier extends FunctionalInstances {
 
     FunctionalClassifier applyToFunctionalClassifier(UnaryOperator<FunctionalClassifier> operator);
 

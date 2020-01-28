@@ -15,9 +15,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
         
         Dataset rndset = Dataset.create("data/sfny.arff")
                 
-                .apply("Randomize -S 0")
+                .filter("Randomize -S 0")
                 
-                .rename("sfny-random")
+                .filter("RenameRelation -modify sfny-random")
                 
                 .write("data/sfny-random.arff");
                 
@@ -35,7 +35,7 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .consumeInstances((in) -> logInfo("Training:  {}-{} ({})", firstTrainIdx, numTotal, in.numInstances()))
                 
-                .rename("sfny-train")
+                .filter("RenameRelation -modify sfny-train")
                 
                 .write("data/sfny-80pct.arff");
         
@@ -51,7 +51,7 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .consumeInstances((in) -> logInfo("Testing:   1-{} ({})", lastTestIdx, in.numInstances()))
                 
-                .rename("sfny-test")
+                .filter("RenameRelation -modify sfny-test")
                 
                 .write("data/sfny-20pct.arff");
                 
@@ -68,9 +68,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .push()
                 
-                .apply("StratifiedRemoveFolds -N 5")
+                .filter("StratifiedRemoveFolds -N 5")
                 
-                .rename("sfny-test")
+                .filter("RenameRelation -modify sfny-test")
                 
                 .write("data/sfny-20pct-strat.arff")
                 
@@ -78,9 +78,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .pop()
                 
-                .apply("StratifiedRemoveFolds -N 5 -V")
+                .filter("StratifiedRemoveFolds -N 5 -V")
                 
-                .rename("sfny-train")
+                .filter("RenameRelation -modify sfny-train")
                 
                 .write("data/sfny-80pct-strat.arff")
                 

@@ -33,13 +33,13 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
         Instances data = Dataset.create("data/sfny.csv")
                 
                 // Convert the 'in_sf' attribute to nominal
-                .apply("NumericToNominal -R first")
+                .filter("NumericToNominal -R first")
                 
                 // Move the 'in_sf' attribute to the end
-                .apply("Reorder -R 2-last,1")
+                .filter("Reorder -R 2-last,1")
                 
                 // Reset the relation name
-                .rename("sfny")
+                .filter("RenameRelation -modify sfny")
 
                 // Write out the resulting dataset
                 .write("data/sfny.arff")

@@ -43,17 +43,17 @@ public class FilterTest {
                     // Use the file component to read the CSV file
                     from("file:src/test/resources/data?fileName=sfny.csv&noop=true")
                     
-                    // The output from the file component is the input to the weka componnet 
-                    .to("weka:read")
-                    
                     // Convert the 'in_sf' attribute to nominal
                     .to("weka:filter?name=NumericToNominal&options=-R first")
                     
                     // Move the 'in_sf' attribute to the end
                     .to("weka:filter?name=Reorder&options=-R 2-last,1")
                     
+                    // Rename the relation
+                    .to("weka:filter?name=RenameRelation&options=-modify sfny")
+                    
                     // Write out the resulting dataset
-                    .to("weka:write?relation=sfny&outPath=target/sfny.arff")
+                    .to("weka:write?outPath=target/sfny.arff")
                     
                     .to("direct:end");
                 }
@@ -64,8 +64,8 @@ public class FilterTest {
             consumer.receiveBody("direct:end");
             
             Path inpath = Paths.get("target/sfny.arff");
-            Instances dataset = DatasetUtils.read(inpath);
-            Assert.assertNotNull(dataset);
+            Instances instances = DatasetUtils.read(inpath);
+            Assert.assertEquals("sfny", instances.relationName());
         }
     }
 }

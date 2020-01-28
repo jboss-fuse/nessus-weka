@@ -35,8 +35,6 @@ public class WekaConfiguration {
     private String name;
     @UriParam(description = "The filter/classifier options")
     private String options;
-    @UriParam(description = "An optional relation name to be set by the write cmd")
-    private String relation;
     @UriParam(description = "An optional output path")
     private String outPath;
     
@@ -75,13 +73,4 @@ public class WekaConfiguration {
     public void setOutPath(String outPath) {
         this.outPath = outPath;
     }
-
-    public String getRelation() {
-        return relation;
-    }
-
-    public void setRelation(String relation) {
-        this.relation = relation;
-    }
-
 }
