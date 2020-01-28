@@ -438,7 +438,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Thomas Diesler</span><br>
 <span id="revnumber">version 1.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-01-27</span>
+<span id="revdate">2020-01-28</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -447,7 +447,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_data_inputoutput">2. Data Input/Output</a>
 <ul class="sectlevel2">
 <li><a href="#_preparing_for_classification">2.1. Preparing for Classification</a></li>
-<li><a href="#_camel_weka_workflow">2.2. Camel-Weka Workflow</a></li>
+<li><a href="#_camel_weka">2.2. Camel-Weka</a></li>
+</ul>
+</li>
+<li><a href="#_classification">3. Classification</a>
+<ul class="sectlevel2">
+<li><a href="#_zeror">3.1. ZeroR</a></li>
+<li><a href="#_oner">3.2. OneR</a></li>
+<li><a href="#_splitting_the_data">3.3. Splitting the Data</a></li>
+<li><a href="#_oner_trainingtest">3.4. OneR Training/Test</a></li>
+<li><a href="#_stratification">3.5. Stratification</a></li>
+<li><a href="#_cross_validation">3.6. Cross-Validation</a></li>
+<li><a href="#_decision_tree">3.7. Decision Tree</a></li>
+<li><a href="#_confusion_matrix">3.8. Confusion Matrix</a></li>
 </ul>
 </li>
 </ul>
@@ -463,7 +475,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Welcome to Nessus Weka. This is a collection of examples and tutorials related to the <a href="https://www.cs.waikato.ac.nz/ml/weka" target="_blank" rel="noopener">Weka</a> data mining toolset.</p>
 </div>
 <div class="paragraph">
-<p>We show you how to get started with simple data mining tasks and how to incorporate these into larger integration workflows.</p>
+<p>In this intro, we&#8217;ll show you how to get started with simple data mining tasks and how to incorporate these into larger <a href="https://camel.apache.org" target="_blank" rel="noopener">Apache Camel</a> workflows.</p>
 </div>
 </div>
 </div>
@@ -532,7 +544,7 @@ you first want to convert into Weka&#8217;s native <a href="https://www.cs.waika
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">    Dataset dataset = Dataset.read("data/sfny.csv")</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.csv")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -540,19 +552,19 @@ you first want to convert into Weka&#8217;s native <a href="https://www.cs.waika
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">    dataset.write("data/sfny.arff")</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">dataset.write("data/sfny.arff")</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In fact, because <a href="https://github.com/tdiesler/nessus-weka/api/src/main/java/io/nessus/weka/Dataset.java" target="_blank" rel="noopener">Dataset</a> has a functional flow API, we could have done</p>
+<p>In fact, because <a href="https://github.com/tdiesler/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/Dataset.java" target="_blank" rel="noopener">Dataset</a> has a functional flow API, we could have done</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">    Dataset.read("data/sfny.csv").write("data/sfny.arff")</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset.create("data/sfny.csv").write("data/sfny.arff")</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Lets open the <a href="https://github.com/tdiesler/nessus-weka/part01/data/sfny-numeric.arff" target="_blank" rel="noopener">converted file</a> in the Weka Explorer</p>
+<p>Lets open the <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny-numeric.arff" target="_blank" rel="noopener">converted file</a> in the Weka Explorer</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -597,8 +609,8 @@ but we leave it as "0" and "1" for now.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">    // Convert the 'in_sf' attribute to nominal
-    dataset.apply("NumericToNominal -R first")</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">// Convert the 'in_sf' attribute to nominal
+dataset.apply("NumericToNominal -R first")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -606,8 +618,8 @@ but we leave it as "0" and "1" for now.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">    // Move the 'in_sf' attribute to the end
-    dataset.apply("Reorder -R 2-last,1")</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">// Move the 'in_sf' attribute to the end
+dataset.apply("Reorder -R 2-last,1")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -619,23 +631,23 @@ Instead, we moved it to the last position where Weka expects to see the class at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">        Dataset.read("data/sfny.csv")
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset.create("data/sfny.csv")
 
-            // Convert the 'in_sf' attribute to nominal
-            .apply("NumericToNominal -R first")
+    // Convert the 'in_sf' attribute to nominal
+    .apply("NumericToNominal -R first")
 
-            // Move the 'in_sf' attribute to the end
-            .apply("Reorder -R 2-last,1")
+    // Move the 'in_sf' attribute to the end
+    .apply("Reorder -R 2-last,1")
 
-            // Reset the relation name
-            //.accept(ds -&gt; ds.setRelationName("sfny"))
+    // Reset the relation name
+    .rename("sfny")
 
-            // Write out the resulting dataset
-            .write("data/sfny.arff");</code></pre>
+    // Write out the resulting dataset
+    .write("data/sfny.arff");</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If you haven&#8217;t done already, lets now open the <a href="https://github.com/tdiesler/nessus-weka/part01/data/sfny.arff" target="_blank" rel="noopener">resulting dataset</a> in the Weka Explorer</p>
+<p>If you haven&#8217;t done already, lets now open the <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">resulting dataset</a> in the Weka Explorer</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -655,38 +667,507 @@ Instead, we moved it to the last position where Weka expects to see the class at
 </div>
 </div>
 <div class="sect2">
-<h3 id="_camel_weka_workflow">2.2. Camel-Weka Workflow</h3>
+<h3 id="_camel_weka">2.2. Camel-Weka</h3>
 <div class="paragraph">
 <p>Wouldn&#8217;t it be great if we could do all of the above in a declarative way as part of an integration workflow with <a href="https://camel.apache.org" target="_blank" rel="noopener">Camel</a>?</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">        CamelContext camelctx = new DefaultCamelContext();
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext();
 
-        camelctx.addRoutes(new RouteBuilder() {
+camelctx.addRoutes(new RouteBuilder() {
 
-            @Override
-            public void configure() throws Exception {
+    @Override
+    public void configure() throws Exception {
 
-                // Use the file component to read the CSV file
-                from("file:src/test/resources/data?fileName=sfny.csv&amp;noop=true")
+        // Use the file component to read the CSV file
+        from("file:src/test/resources/data?fileName=sfny.csv&amp;noop=true")
 
-                // The output from the file component is the input to the weka componnet
-                .to("weka:read")
+        // The output from the file component is the input to the weka componnet
+        .to("weka:read")
 
-                // Convert the 'in_sf' attribute to nominal
-                .to("weka:filter?name=NumericToNominal&amp;options=-R first")
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?name=NumericToNominal&amp;options=-R first")
 
-                // Move the 'in_sf' attribute to the end
-                .to("weka:filter?name=Reorder&amp;options=-R 2-last,1")
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?name=Reorder&amp;options=-R 2-last,1")
 
-                // Write out the resulting dataset
-                .to("weka:write?relation=sfny&amp;outPath=target/sfny.arff")
-            }
-        });
+        // Write out the resulting dataset
+        .to("weka:write?relation=sfny&amp;outPath=target/sfny.arff")
+    }
+});
 
-        camelctx.start();</code></pre>
+camelctx.start();</code></pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_classification">3. Classification</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With classification, we would ultimately like to tell which class an yet unseen data instance belongs to.
+In our case, we would like to to predict whether a home is located in San Fancisco or New York.</p>
+</div>
+<div class="paragraph">
+<p>Lets now build a prediction model, which we train with our knowledge from the data that we have.</p>
+</div>
+<div class="sect2">
+<h3 id="_zeror">3.1. ZeroR</h3>
+<div class="paragraph">
+<p>But first, lets establish a few base lines which will later help us to assess the quality of our prediction model.</p>
+</div>
+<div class="paragraph">
+<p>The most basic prediction algorithm is <a href="https://www.saedsayad.com/zeror.htm" target="_blank" rel="noopener">ZeroR</a>. It stands for "no rule at all".
+It simply counts the number of instances per class and always predicts the class with the highest number of instances.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("ZeroR")
+
+    .evaluateModel(dataset)
+
+    .getEvaluation();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is the output for this simple ZeroR analysis</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>ZeroR predicts class value: 1
+
+=== Summary ===
+
+Correctly Classified Instances         268               54.4715 %
+Incorrectly Classified Instances       224               45.5285 %
+Kappa statistic                          0
+Mean absolute error                      0.496
+Root mean squared error                  0.498
+Relative absolute error                100      %
+Root relative squared error            100      %
+Total Number of Instances              492</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>According to ZeroR, every home ever presented is located in San Francisco and it would be correct about that in 54.47% of the cases.
+This would be just a little better than tossing a coin (i.e. not very reliable at all).</p>
+</div>
+<div class="paragraph">
+<p>Why is it exactly that number? Well, if you remember our class distribution we have 268 instances in SF and 224 in NY.
+ZeroR calculates 268/492 = 0.5447</p>
+</div>
+<div class="paragraph">
+<p>Lets try to build a better model &#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_oner">3.2. OneR</h3>
+<div class="paragraph">
+<p><a href="https://www.saedsayad.com/oner.htm" target="_blank" rel="noopener">OneR</a> is still a very simple classification algorithm. It stands for "one rule".
+Whereas ZeroR did not look at any of the attributes, OneR finds the one attribute that leads to the highest accuracy.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("OneR")
+
+    .evaluateModel(dataset)
+
+    .getEvaluation();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is the output for the OneR analysis</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>elevation:
+    &lt; 4.5   -&gt; 1
+    &lt; 12.5  -&gt; 0
+    &lt; 13.5  -&gt; 1
+    &lt; 30.5  -&gt; 0
+    &gt;= 30.5 -&gt; 1
+(407/492 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances         407               82.7236 %
+Incorrectly Classified Instances        85               17.2764 %
+Kappa statistic                          0.6553
+Mean absolute error                      0.1728
+Root mean squared error                  0.4156
+Relative absolute error                 34.8303 %
+Root relative squared error             83.4643 %
+Total Number of Instances              492</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A prediction accuracy of 82.72% is quite good. Actually, much better than tossing a coin.</p>
+</div>
+<div class="paragraph">
+<p>Do you rember when I asked you to guess the best descriminator attribute? Here you have it &#8230;&#8203; it is "elevation".</p>
+</div>
+<div class="paragraph">
+<p>But, hang on. Didn&#8217;t we just cheat ourselves? We trained the model with the full dataset and then ask for a prediction using the same dataset.
+The model already knew every data instance and could therefore find the ideal boundaries for every attribute.</p>
+</div>
+<div class="paragraph">
+<p>This is called "over fitting". We built a model that works very well for the given dataset, but might be useless for data it hasn&#8217;t seen yet - it learned the data.</p>
+</div>
+<div class="paragraph">
+<p>Lets fix that &#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_splitting_the_data">3.3. Splitting the Data</h3>
+<div class="paragraph">
+<p>Assuming that we don&#8217;t have another source of data, we need to split up the data that we do have.
+A good rule of thumb is perhaps to use 80% for training the model and 20% for evaluating its performance.</p>
+</div>
+<div class="paragraph">
+<p>When you look at <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">sfny.arff</a> you will notice that all instances for NY come first, followed by the instances for SF.
+Simply using the first 80% of instances for training would not work so well. We therefore randomly reorder the data instances before we do the split.</p>
+</div>
+<div class="paragraph">
+<p>Many of the algorithms in Weka involve a fair bit of randomization. It would however be a nightmare, if we saw different results on every run.
+It would also be pointless to show actual figures as we have done so far. The solution is to use an explicit randomization seed.
+Given the same seed the randomizer produces the same sequence of numbers - below we use <code>-S 0</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset rndset = Dataset.create("data/sfny.arff")
+
+        .apply("Randomize -S 0")
+
+        .rename("sfny-random")
+
+        .write("data/sfny-random.arff");
+
+int numTotal = rndset.getInstances().numInstances();
+int firstTrainIdx = (int) Math.round(numTotal * 0.20);
+int lastTestIdx = firstTrainIdx - 1;
+
+Dataset trainset = new Dataset(rndset.getInstances())
+
+        .applyToInstances((in) -&gt; applyFilter(in, "RemoveRange -R 1-" + lastTestIdx))
+
+        .rename("sfny-train")
+
+        .write("data/sfny-80pct.arff");
+
+Dataset testset = new Dataset(rndset.getInstances())
+
+        .applyToInstances((in) -&gt; applyFilter(in, "RemoveRange -R " + firstTrainIdx + "-" + numTotal))
+
+        .rename("sfny-test")
+
+        .write("data/sfny-20pct.arff");
+
+Assert.assertEquals(492, rndset.getInstances().numInstances());
+Assert.assertEquals(395, trainset.getInstances().numInstances());
+Assert.assertEquals(97, testset.getInstances().numInstances());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets run OneR again &#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_oner_trainingtest">3.4. OneR Training/Test</h3>
+<div class="paragraph">
+<p>Now that we have split our data in two sets, lets run OneR again &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset training = Dataset.create("data/sfny-80pct.arff");
+Dataset testing = Dataset.create("data/sfny-20pct.arff");
+
+Evaluation eval = training
+
+    .classifier("OneR")
+
+    .evaluateModel(testing)
+
+    .getEvaluation();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The result is different, but still much better than ZeroR</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>elevation:
+    &lt; 1.5   -&gt; 1
+    &lt; 3.5   -&gt; 0
+    &lt; 5.5   -&gt; 1
+    &lt; 30.5  -&gt; 0
+    &gt;= 30.5 -&gt; 1
+(325/395 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances          75               77.3196 %
+Incorrectly Classified Instances        22               22.6804 %
+Kappa statistic                          0.5473
+Mean absolute error                      0.2268
+Root mean squared error                  0.4762
+Relative absolute error                 45.9273 %
+Root relative squared error             96.2495 %
+Total Number of Instances               97</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we have a model that is still very simple, but would likely work in more than 3/4 of all cases.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stratification">3.5. Stratification</h3>
+<div class="paragraph">
+<p>Because we used a random process to split our data there is chance that we introduced some skew. How would our model be effected if the training/test data
+did not have the same class distribution as the full dataset. Lets say, the training set had a significant higher percentage of SF homes than the test set.
+It this case, the model would likely be biased on SF homes.</p>
+</div>
+<div class="paragraph">
+<p>There is a method that can split our data in a "supervised" way, such that the class value distribution it taken into account.</p>
+</div>
+<div class="paragraph">
+<p>Lets try that as well &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff")
+
+        // Push the full dataset to the stack
+        .push()
+
+        .apply("StratifiedRemoveFolds -N 5")
+
+        .rename("sfny-test")
+
+        .write("data/sfny-20pct-strat.arff")
+
+        .pushTestSet()
+
+        // Pop the full dataset from the stack
+        .pop()
+
+        .apply("StratifiedRemoveFolds -N 5 -V")
+
+        .rename("sfny-train")
+
+        .write("data/sfny-80pct-strat.arff")
+
+        .pushTrainingSet();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Above, we use the concept of named dataset slots from the Dataset API. It simply means that a Dataset can maintain a theoretically unlimmited number
+of named Weka Instances. And because the split into "training/testing" is so common, we have explicit methods to push/pop those.</p>
+</div>
+<div class="paragraph">
+<p>Running OneR using a stratified data split, gives us &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>elevation:
+    &lt; 4.5   -&gt; 1
+    &lt; 12.5  -&gt; 0
+    &lt; 14.5  -&gt; 1
+    &lt; 25.5  -&gt; 0
+    &gt;= 25.5 -&gt; 1
+(323/393 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances          81               81.8182 %
+Incorrectly Classified Instances        18               18.1818 %
+Kappa statistic                          0.6333
+Mean absolute error                      0.1818
+Root mean squared error                  0.4264
+Relative absolute error                 36.6589 %
+Root relative squared error             85.6347 %
+Total Number of Instances               99</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I guess an almost 5% improvement is significant. Do we already trust this model?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cross_validation">3.6. Cross-Validation</h3>
+<div class="paragraph">
+<p>You might think OneR is quite boring and there is only so much improvement you can do using this algorithm.
+Well yes, you might be right about this, but we are not quite there yet &#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>The stratified split above divides the data into five "folds" it reserves one fold (i.e. 20%) for testing and uses the other four folds for training the model.
+We could also have used 10 folds and we could have done the whole process over and over again using a different random seeds every time. At the end, we could
+have averaged the results that we thus obtained and only then go to the pub with high confidence in our model.</p>
+</div>
+<div class="paragraph">
+<p>Lets finally do that and see what it gives us &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("OneR")
+
+    .crossValidateModel(10, 1)
+
+    .getEvaluation();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, this is really not a lot of code. All data splitting, stratification and re-building the model several time is done under the hood.
+This is also the default method that Weka uses when you open a dataset and run any classifier with default options.</p>
+</div>
+<div class="paragraph">
+<p>Finally, this is what we get &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>elevation:
+    &lt; 4.5   -&gt; 1
+    &lt; 12.5  -&gt; 0
+    &lt; 13.5  -&gt; 1
+    &lt; 30.5  -&gt; 0
+    &gt;= 30.5 -&gt; 1
+(407/492 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances         379               77.0325 %
+Incorrectly Classified Instances       113               22.9675 %
+Kappa statistic                          0.5401
+Mean absolute error                      0.2297
+Root mean squared error                  0.4792
+Relative absolute error                 46.3022 %
+Root relative squared error             96.2313 %
+Total Number of Instances              492</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Interestingly enough, the model configuration is quite similar to our own stratified split and the result quite similar to our own percentage split.
+I guess, we&#8217;ve just been lucky in the way we split the data. Anyhow, I&#8217;d say this is OneR with a good level of confidence.</p>
+</div>
+<div class="paragraph">
+<p>How about, building a model that works on multiple attributes &#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_decision_tree">3.7. Decision Tree</h3>
+<div class="paragraph">
+<p>Lets meet <a href="https://en.wikipedia.org/wiki/C4.5_algorithm" target="_blank" rel="noopener">J48</a>, "a landmark decision tree program that is probably the machine learning workhorse most widely used in practice to date" ()</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("J48")
+
+    .crossValidateModel(10, 1)
+
+    .getEvaluation();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the default 10-fold cross-validation method it performs significantly better than OneR.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code>J48 pruned tree
+------------------
+
+elevation &lt;= 32
+|   price_per_sqft &lt;= 1072
+|   |   year_built &lt;= 1972
+|   |   |   beds &lt;= 1
+|   |   |   |   sqft &lt;= 756: 0 (28.0)
+|   |   |   |   sqft &gt; 756
+|   |   |   |   |   sqft &lt;= 784: 1 (2.0)
+|   |   |   |   |   sqft &gt; 784
+|   |   |   |   |   |   sqft &lt;= 1063: 0 (5.0)
+|   |   |   |   |   |   sqft &gt; 1063
+|   |   |   |   |   |   |   price_per_sqft &lt;= 750: 1 (2.0)
+|   |   |   |   |   |   |   price_per_sqft &gt; 750: 0 (2.0)
+|   |   |   beds &gt; 1
+|   |   |   |   price_per_sqft &lt;= 829
+|   |   |   |   |   elevation &lt;= 10
+|   |   |   |   |   |   year_built &lt;= 1924: 0 (4.0)
+|   |   |   |   |   |   year_built &gt; 1924: 1 (2.0)
+|   |   |   |   |   elevation &gt; 10: 1 (13.0)
+|   |   |   |   price_per_sqft &gt; 829
+|   |   |   |   |   price_per_sqft &lt;= 1002: 0 (12.0)
+|   |   |   |   |   price_per_sqft &gt; 1002: 1 (3.0/1.0)
+|   |   year_built &gt; 1972: 1 (46.0/3.0)
+|   price_per_sqft &gt; 1072
+|   |   elevation &lt;= 4
+|   |   |   bath &lt;= 2.5
+|   |   |   |   year_built &lt;= 2005: 0 (6.0/1.0)
+|   |   |   |   year_built &gt; 2005: 1 (7.0/1.0)
+|   |   |   bath &gt; 2.5: 0 (10.0/2.0)
+|   |   elevation &gt; 4
+|   |   |   price_per_sqft &lt;= 1379
+|   |   |   |   year_built &lt;= 2008
+|   |   |   |   |   beds &lt;= 3: 0 (42.0/4.0)
+|   |   |   |   |   beds &gt; 3: 1 (3.0/1.0)
+|   |   |   |   year_built &gt; 2008: 1 (6.0)
+|   |   |   price_per_sqft &gt; 1379: 0 (110.0/2.0)
+elevation &gt; 32
+|   price &lt;= 569000
+|   |   year_built &lt;= 1916: 1 (5.0)
+|   |   year_built &gt; 1916
+|   |   |   year_built &lt;= 1948: 0 (4.0)
+|   |   |   year_built &gt; 1948: 1 (5.0/1.0)
+|   price &gt; 569000: 1 (175.0/3.0)
+
+Number of Leaves  :     22
+
+Size of the tree :  43
+
+=== Summary ===
+
+Correctly Classified Instances         420               85.3659 %
+Incorrectly Classified Instances        72               14.6341 %
+Kappa statistic                          0.7069
+Mean absolute error                      0.1727
+Root mean squared error                  0.3601
+Relative absolute error                 34.8079 %
+Root relative squared error             72.3008 %
+Total Number of Instances              492</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An accuracy of 85.37% with an high level of confidence in the model, is quite good I&#8217;d say.</p>
+</div>
+<div class="paragraph">
+<p>When you right-click on the classification result, you can see the tree model visualized. Please note, that J48 also chooses "elevation" as the initial discriminator.
+Each split is then performed such that it yields to the maximum of information gain.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="img/classification/j48-tree.png" alt="J48 Tree">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_confusion_matrix">3.8. Confusion Matrix</h3>
+<div class="paragraph">
+<p>To be done &#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -695,8 +1176,11 @@ Instead, we moved it to the last position where Weka expects to see the class at
 <div id="footer">
 <div id="footer-text">
 Version 1.0.0-SNAPSHOT<br>
-Last updated 2020-01-27 14:20:12 CET
+Last updated 2020-01-28 16:38:47 CET
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>prettyPrint()</script>
 </body>
 </html>
