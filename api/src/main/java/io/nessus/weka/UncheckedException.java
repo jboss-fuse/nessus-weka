@@ -1,17 +1,17 @@
 package io.nessus.weka;
 
 @SuppressWarnings("serial")
-public class CheckedException extends RuntimeException {
+public class UncheckedException extends RuntimeException {
 
     public static RuntimeException create(Throwable cause) {
         
     	if (cause instanceof RuntimeException) 
         	return (RuntimeException) cause;
     	
-        return new CheckedException(cause);
+        return new UncheckedException(cause);
     }
     
-    public CheckedException(Throwable cause) {
+    private UncheckedException(Throwable cause) {
         super(cause);
     }
 }

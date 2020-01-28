@@ -15,21 +15,21 @@ Reading data is easy ...
 
 [source,java]
 ----
-    Dataset dataset = Dataset.read("data/sfny.csv")
+Dataset dataset = Dataset.create("data/sfny.csv")
 ----
     
 Converting this into an .arff file is easy too ...
 
 [source,java]
 ----
-    dataset.write("data/sfny.arff")
+dataset.write("data/sfny.arff")
 ----
     
 In fact, because {java-api}/io/nessus/weka/Dataset.java[Dataset,window=_blank] has a functional flow API, we could have done
 
 [source,java]
 ----
-    Dataset.read("data/sfny.csv").write("data/sfny.arff")
+Dataset.create("data/sfny.csv").write("data/sfny.arff")
 ----
 
 Lets open the {data-part01}/sfny-numeric.arff[converted file,window=_blank] in the Weka Explorer
@@ -59,16 +59,16 @@ What we want here, is to apply the `NumericToNominal` attribute filter like this
 
 [source,java]
 ----
-    // Convert the 'in_sf' attribute to nominal
-    dataset.apply("NumericToNominal -R first")
+// Convert the 'in_sf' attribute to nominal
+dataset.apply("NumericToNominal -R first")
 ----
  
 and to reorder the attributes such that `in_sf` becomes the last attribute in the list, like this ... 
  
 [source,java]
 ----
-    // Move the 'in_sf' attribute to the end
-    dataset.apply("Reorder -R 2-last,1")
+// Move the 'in_sf' attribute to the end
+dataset.apply("Reorder -R 2-last,1")
 ----
 
 We could have left the class attribute in the first position and set this explicitly to be the class attribute. 
@@ -78,19 +78,19 @@ Putting it all together in Nessus API, it looks like this ...
 
 [source,java]
 ----
-        Dataset.read("data/sfny.csv")
-                
-            // Convert the 'in_sf' attribute to nominal
-            .apply("NumericToNominal -R first")
-            
-            // Move the 'in_sf' attribute to the end
-            .apply("Reorder -R 2-last,1")
-            
-            // Reset the relation name
-            //.accept(ds -> ds.setRelationName("sfny"))
+Dataset.create("data/sfny.csv")
+        
+    // Convert the 'in_sf' attribute to nominal
+    .apply("NumericToNominal -R first")
+    
+    // Move the 'in_sf' attribute to the end
+    .apply("Reorder -R 2-last,1")
+    
+    // Reset the relation name
+    .rename("sfny")
 
-            // Write out the resulting dataset
-            .write("data/sfny.arff");
+    // Write out the resulting dataset
+    .write("data/sfny.arff");
 ----
 
 If you haven't done already, lets now open the {data-part01}/sfny.arff[resulting dataset,window=_blank] in the Weka Explorer
@@ -103,37 +103,37 @@ image::data-inout/sfny-visualize.png[]
 
 Which one of those attributes is a good candidate for initial class discrimination? Have a guess ...
 
-### Camel-Weka Workflow
+### Camel-Weka
 
 Wouldn't it be great if we could do all of the above in a declarative way as part of an integration workflow with https://camel.apache.org[Camel,window=_blank]?
 
 [source,java]
 ----
-        CamelContext camelctx = new DefaultCamelContext();
+CamelContext camelctx = new DefaultCamelContext();
+
+camelctx.addRoutes(new RouteBuilder() {
+
+    @Override
+    public void configure() throws Exception {
         
-        camelctx.addRoutes(new RouteBuilder() {
+        // Use the file component to read the CSV file
+        from("file:src/test/resources/data?fileName=sfny.csv&noop=true")
         
-            @Override
-            public void configure() throws Exception {
-                
-                // Use the file component to read the CSV file
-                from("file:src/test/resources/data?fileName=sfny.csv&noop=true")
-                
-                // The output from the file component is the input to the weka componnet 
-                .to("weka:read")
-                
-                // Convert the 'in_sf' attribute to nominal
-                .to("weka:filter?name=NumericToNominal&options=-R first")
-                
-                // Move the 'in_sf' attribute to the end
-                .to("weka:filter?name=Reorder&options=-R 2-last,1")
-                
-                // Write out the resulting dataset
-                .to("weka:write?relation=sfny&outPath=target/sfny.arff")
-            }
-        });
+        // The output from the file component is the input to the weka componnet 
+        .to("weka:read")
         
-        camelctx.start();
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?name=NumericToNominal&options=-R first")
+        
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?name=Reorder&options=-R 2-last,1")
+        
+        // Write out the resulting dataset
+        .to("weka:write?relation=sfny&outPath=target/sfny.arff")
+    }
+});
+
+camelctx.start();
 ----
    
 

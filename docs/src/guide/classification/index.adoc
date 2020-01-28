@@ -1,0 +1,415 @@
+
+## Classification
+
+With classification, we would ultimately like to tell which class an yet unseen data instance belongs to. 
+In our case, we would like to to predict whether a home is located in San Fancisco or New York.
+
+Lets now build a prediction model, which we train with our knowledge from the data that we have.
+
+### ZeroR
+
+But first, lets establish a few base lines which will later help us to assess the quality of our prediction model.
+
+The most basic prediction algorithm is https://www.saedsayad.com/zeror.htm[ZeroR,window=_blank]. It stands for "no rule at all".
+It simply counts the number of instances per class and always predicts the class with the highest number of instances.
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("ZeroR")
+    
+    .evaluateModel(dataset)
+    
+    .getEvaluation();
+----
+
+Here is the output for this simple ZeroR analysis 
+
+[source]
+----
+ZeroR predicts class value: 1
+
+=== Summary ===
+
+Correctly Classified Instances         268               54.4715 %
+Incorrectly Classified Instances       224               45.5285 %
+Kappa statistic                          0     
+Mean absolute error                      0.496 
+Root mean squared error                  0.498 
+Relative absolute error                100      %
+Root relative squared error            100      %
+Total Number of Instances              492     
+----
+    
+According to ZeroR, every home ever presented is located in San Francisco and it would be correct about that in 54.47% of the cases.
+This would be just a little better than tossing a coin (i.e. not very reliable at all).
+
+Why is it exactly that number? Well, if you remember our class distribution we have 268 instances in SF and 224 in NY.
+ZeroR calculates 268/492 = 0.5447 
+
+Lets try to build a better model ...
+
+### OneR 
+
+https://www.saedsayad.com/oner.htm[OneR,window=_blank] is still a very simple classification algorithm. It stands for "one rule".
+Whereas ZeroR did not look at any of the attributes, OneR finds the one attribute that leads to the highest accuracy.
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("OneR")
+    
+    .evaluateModel(dataset)
+    
+    .getEvaluation();
+----
+
+Here is the output for the OneR analysis 
+
+[source]
+----
+elevation:
+    < 4.5   -> 1
+    < 12.5  -> 0
+    < 13.5  -> 1
+    < 30.5  -> 0
+    >= 30.5 -> 1
+(407/492 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances         407               82.7236 %
+Incorrectly Classified Instances        85               17.2764 %
+Kappa statistic                          0.6553
+Mean absolute error                      0.1728
+Root mean squared error                  0.4156
+Relative absolute error                 34.8303 %
+Root relative squared error             83.4643 %
+Total Number of Instances              492     
+----
+    
+A prediction accuracy of 82.72% is quite good. Actually, much better than tossing a coin.  
+
+Do you rember when I asked you to guess the best descriminator attribute? Here you have it ... it is "elevation".
+
+But, hang on. Didn't we just cheat ourselves? We trained the model with the full dataset and then ask for a prediction using the same dataset. 
+The model already knew every data instance and could therefore find the ideal boundaries for every attribute. 
+
+This is called "over fitting". We built a model that works very well for the given dataset, but might be useless for data it hasn't seen yet - it learned the data.
+
+Lets fix that ...
+
+### Splitting the Data
+
+Assuming that we don't have another source of data, we need to split up the data that we do have. 
+A good rule of thumb is perhaps to use 80% for training the model and 20% for evaluating its performance.  
+
+When you look at {data-part01}/sfny.arff[sfny.arff,window=_blank] you will notice that all instances for NY come first, followed by the instances for SF.
+Simply using the first 80% of instances for training would not work so well. We therefore randomly reorder the data instances before we do the split.
+
+Many of the algorithms in Weka involve a fair bit of randomization. It would however be a nightmare, if we saw different results on every run. 
+It would also be pointless to show actual figures as we have done so far. The solution is to use an explicit randomization seed. 
+Given the same seed the randomizer produces the same sequence of numbers - below we use `-S 0`    
+
+[source,java]
+----
+Dataset rndset = Dataset.create("data/sfny.arff")
+        
+        .apply("Randomize -S 0")
+        
+        .rename("sfny-random")
+        
+        .write("data/sfny-random.arff");
+        
+int numTotal = rndset.getInstances().numInstances();
+int firstTrainIdx = (int) Math.round(numTotal * 0.20);
+int lastTestIdx = firstTrainIdx - 1;
+
+Dataset trainset = new Dataset(rndset.getInstances())
+        
+        .applyToInstances((in) -> applyFilter(in, "RemoveRange -R 1-" + lastTestIdx))
+        
+        .rename("sfny-train")
+        
+        .write("data/sfny-80pct.arff");
+
+Dataset testset = new Dataset(rndset.getInstances())
+        
+        .applyToInstances((in) -> applyFilter(in, "RemoveRange -R " + firstTrainIdx + "-" + numTotal))
+        
+        .rename("sfny-test")
+        
+        .write("data/sfny-20pct.arff");
+        
+Assert.assertEquals(492, rndset.getInstances().numInstances());
+Assert.assertEquals(395, trainset.getInstances().numInstances());
+Assert.assertEquals(97, testset.getInstances().numInstances());
+----
+
+Lets run OneR again ...
+
+### OneR Training/Test
+
+Now that we have split our data in two sets, lets run OneR again ...
+
+[source,java]
+----
+Dataset training = Dataset.create("data/sfny-80pct.arff");
+Dataset testing = Dataset.create("data/sfny-20pct.arff");
+
+Evaluation eval = training
+
+    .classifier("OneR")
+    
+    .evaluateModel(testing)
+    
+    .getEvaluation();
+----
+
+The result is different, but still much better than ZeroR 
+
+[source]
+----
+elevation:
+    < 1.5   -> 1
+    < 3.5   -> 0
+    < 5.5   -> 1
+    < 30.5  -> 0
+    >= 30.5 -> 1
+(325/395 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances          75               77.3196 %
+Incorrectly Classified Instances        22               22.6804 %
+Kappa statistic                          0.5473
+Mean absolute error                      0.2268
+Root mean squared error                  0.4762
+Relative absolute error                 45.9273 %
+Root relative squared error             96.2495 %
+Total Number of Instances               97     
+----
+
+Now we have a model that is still very simple, but would likely work in more than 3/4 of all cases.
+
+### Stratification
+
+Because we used a random process to split our data there is chance that we introduced some skew. How would our model be effected if the training/test data
+did not have the same class distribution as the full dataset. Lets say, the training set had a significant higher percentage of SF homes than the test set.
+It this case, the model would likely be biased on SF homes.
+
+There is a method that can split our data in a "supervised" way, such that the class value distribution it taken into account. 
+
+Lets try that as well ...   
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny.arff")
+        
+        // Push the full dataset to the stack
+        .push()
+        
+        .apply("StratifiedRemoveFolds -N 5")
+        
+        .rename("sfny-test")
+        
+        .write("data/sfny-20pct-strat.arff")
+        
+        .pushTestSet()
+        
+        // Pop the full dataset from the stack
+        .pop()
+        
+        .apply("StratifiedRemoveFolds -N 5 -V")
+        
+        .rename("sfny-train")
+        
+        .write("data/sfny-80pct-strat.arff")
+        
+        .pushTrainingSet();
+----
+
+Above, we use the concept of named dataset slots from the Dataset API. It simply means that a Dataset can maintain a theoretically unlimmited number
+of named Weka Instances. And because the split into "training/testing" is so common, we have explicit methods to push/pop those.   
+
+Running OneR using a stratified data split, gives us ...
+
+[source]
+----
+elevation:
+    < 4.5   -> 1
+    < 12.5  -> 0
+    < 14.5  -> 1
+    < 25.5  -> 0
+    >= 25.5 -> 1
+(323/393 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances          81               81.8182 %
+Incorrectly Classified Instances        18               18.1818 %
+Kappa statistic                          0.6333
+Mean absolute error                      0.1818
+Root mean squared error                  0.4264
+Relative absolute error                 36.6589 %
+Root relative squared error             85.6347 %
+Total Number of Instances               99     
+----
+
+I guess an almost 5% improvement is significant. Do we already trust this model? 
+
+### Cross-Validation
+
+You might think OneR is quite boring and there is only so much improvement you can do using this algorithm. 
+Well yes, you might be right about this, but we are not quite there yet ...
+
+The stratified split above divides the data into five "folds" it reserves one fold (i.e. 20%) for testing and uses the other four folds for training the model.
+We could also have used 10 folds and we could have done the whole process over and over again using a different random seeds every time. At the end, we could 
+have averaged the results that we thus obtained and only then go to the pub with high confidence in our model.
+
+Lets finally do that and see what it gives us ...
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("OneR")
+    
+    .crossValidateModel(10, 1)
+
+    .getEvaluation();
+----
+   
+As you can see, this is really not a lot of code. All data splitting, stratification and re-building the model several time is done under the hood.
+This is also the default method that Weka uses when you open a dataset and run any classifier with default options.
+
+Finally, this is what we get ...   
+
+[source]
+----
+elevation:
+    < 4.5   -> 1
+    < 12.5  -> 0
+    < 13.5  -> 1
+    < 30.5  -> 0
+    >= 30.5 -> 1
+(407/492 instances correct)
+
+=== Summary ===
+
+Correctly Classified Instances         379               77.0325 %
+Incorrectly Classified Instances       113               22.9675 %
+Kappa statistic                          0.5401
+Mean absolute error                      0.2297
+Root mean squared error                  0.4792
+Relative absolute error                 46.3022 %
+Root relative squared error             96.2313 %
+Total Number of Instances              492     
+----
+ 
+Interestingly enough, the model configuration is quite similar to our own stratified split and the result quite similar to our own percentage split. 
+I guess, we've just been lucky in the way we split the data. Anyhow, I'd say this is OneR with a good level of confidence. 
+
+How about, building a model that works on multiple attributes ...
+
+### Decision Tree
+
+Lets meet https://en.wikipedia.org/wiki/C4.5_algorithm[J48,window=_blank], "a landmark decision tree program that is probably the machine learning workhorse most widely used in practice to date" ()
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny.arff");
+
+Evaluation eval = dataset
+
+    .classifier("J48")
+    
+    .crossValidateModel(10, 1)
+
+    .getEvaluation();
+----
+
+With the default 10-fold cross-validation method it performs significantly better than OneR. 
+
+[source]
+----
+J48 pruned tree
+------------------
+
+elevation <= 32
+|   price_per_sqft <= 1072
+|   |   year_built <= 1972
+|   |   |   beds <= 1
+|   |   |   |   sqft <= 756: 0 (28.0)
+|   |   |   |   sqft > 756
+|   |   |   |   |   sqft <= 784: 1 (2.0)
+|   |   |   |   |   sqft > 784
+|   |   |   |   |   |   sqft <= 1063: 0 (5.0)
+|   |   |   |   |   |   sqft > 1063
+|   |   |   |   |   |   |   price_per_sqft <= 750: 1 (2.0)
+|   |   |   |   |   |   |   price_per_sqft > 750: 0 (2.0)
+|   |   |   beds > 1
+|   |   |   |   price_per_sqft <= 829
+|   |   |   |   |   elevation <= 10
+|   |   |   |   |   |   year_built <= 1924: 0 (4.0)
+|   |   |   |   |   |   year_built > 1924: 1 (2.0)
+|   |   |   |   |   elevation > 10: 1 (13.0)
+|   |   |   |   price_per_sqft > 829
+|   |   |   |   |   price_per_sqft <= 1002: 0 (12.0)
+|   |   |   |   |   price_per_sqft > 1002: 1 (3.0/1.0)
+|   |   year_built > 1972: 1 (46.0/3.0)
+|   price_per_sqft > 1072
+|   |   elevation <= 4
+|   |   |   bath <= 2.5
+|   |   |   |   year_built <= 2005: 0 (6.0/1.0)
+|   |   |   |   year_built > 2005: 1 (7.0/1.0)
+|   |   |   bath > 2.5: 0 (10.0/2.0)
+|   |   elevation > 4
+|   |   |   price_per_sqft <= 1379
+|   |   |   |   year_built <= 2008
+|   |   |   |   |   beds <= 3: 0 (42.0/4.0)
+|   |   |   |   |   beds > 3: 1 (3.0/1.0)
+|   |   |   |   year_built > 2008: 1 (6.0)
+|   |   |   price_per_sqft > 1379: 0 (110.0/2.0)
+elevation > 32
+|   price <= 569000
+|   |   year_built <= 1916: 1 (5.0)
+|   |   year_built > 1916
+|   |   |   year_built <= 1948: 0 (4.0)
+|   |   |   year_built > 1948: 1 (5.0/1.0)
+|   price > 569000: 1 (175.0/3.0)
+
+Number of Leaves  :     22
+
+Size of the tree :  43
+
+=== Summary ===
+
+Correctly Classified Instances         420               85.3659 %
+Incorrectly Classified Instances        72               14.6341 %
+Kappa statistic                          0.7069
+Mean absolute error                      0.1727
+Root mean squared error                  0.3601
+Relative absolute error                 34.8079 %
+Root relative squared error             72.3008 %
+Total Number of Instances              492     
+----
+
+An accuracy of 85.37% with an high level of confidence in the model, is quite good I'd say.
+ 
+When you right-click on the classification result, you can see the tree model visualized. Please note, that J48 also chooses "elevation" as the initial discriminator.
+Each split is then performed such that it yields to the maximum of information gain.
+
+image::classification/j48-tree.png[J48 Tree]
+
+### Confusion Matrix
+
+To be done ...

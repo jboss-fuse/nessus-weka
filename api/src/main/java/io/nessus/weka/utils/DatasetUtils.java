@@ -1,18 +1,20 @@
 package io.nessus.weka.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
+import io.nessus.weka.AssertArg;
 import io.nessus.weka.AssertState;
-import io.nessus.weka.CheckedException;
-import io.nessus.weka.Operator;
+import io.nessus.weka.UncheckedException;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -23,83 +25,86 @@ public class DatasetUtils {
     private DatasetUtils() {
     }
     
+    public static Instances read(URL url) {
+        return readInternal(url);
+    }
+    
     public static Instances read(Path inpath) {
-        return read(inpath.toString());
+        return readInternal(toURL(inpath));
     }
-    
+
     public static Instances read(String inpath) {
-        try {
-            DataSource source = new DataSource(inpath); 
-            return source.getDataSet();
-        } catch (Exception ex) {
-            throw CheckedException.create(ex);
-        }
-    }
-    
-    public static void write(Instances dataset, Path outpath) {
-        write(dataset, outpath.toString());
-    }
-    
-    public static void write(Instances dataset, String outpath) {
-        try {
-            DataSink.write(outpath, dataset);
-        } catch (Exception ex) {
-            throw CheckedException.create(ex);
-        }
-    }
-    
-    public static Instances applyFilter(Instances dataset, String spec) {
-        return applyFilter(dataset, new Operator(spec));
+        return read(Paths.get(inpath));
     }
 
-    public static Instances applyFilter(Instances dataset, String name, String options) {
-        return applyFilter(dataset, new Operator(name, options));
+    public static void write(Instances instances, Path outpath) {
+        writeInternal(instances, outpath);
+    }
+    
+    public static Instances applyFilter(Instances instances, String filterSpec) {
+        return applyFilter(instances, new OperatorSpec(filterSpec));
     }
 
-    public static Instances applyFilter(Instances dataset, Operator spec) {
-        return applyFilter(dataset, spec.getName(), spec.getOptions());
+    public static Instances applyFilter(Instances instances, String name, String[] options) {
+        return applyFilter(instances, new OperatorSpec(name, options));
     }
 
-    public static Instances applyFilter(Instances dataset, String name, String[] options) {
+    public static Instances applyFilter(Instances instances, OperatorSpec spec) {
         try {
-            Filter filter = loadInstance(name, Filter.class);
-            filter.setInputFormat(dataset);
-            filter.setOptions(options);
-            dataset = Filter.useFilter(dataset, filter);
-            return dataset;
+            Filter filter = loadInstance(spec.getName(), Filter.class);
+            filter.setInputFormat(instances);
+            filter.setOptions(spec.getOptions());
+            instances = Filter.useFilter(instances, filter);
+            return instances;
         } catch (Exception ex) {
-            throw CheckedException.create(ex);
+            throw UncheckedException.create(ex);
         }
     }
 
-    public static Classifier buildClassifier(Instances dataset, String classifierName, String options) {
-        return buildClassifier(dataset, classifierName, optionsNotNull(options).split(" "));
+    public static Classifier buildClassifier(Instances instances, String classifierSpec) {
+        return buildClassifier(instances, new OperatorSpec(classifierSpec));
     }
-
-    public static Classifier buildClassifier(Instances dataset, String classifierName, String[] options) {
+    
+    public static Classifier buildClassifier(Instances instances, String name, String[] options) {
+        return buildClassifier(instances, new OperatorSpec(name, options));
+    }
+    
+    public static Classifier buildClassifier(Instances instances, OperatorSpec spec) {
         try {
-            Classifier classifier = loadInstance(classifierName, Classifier.class);
-            classifier.buildClassifier(dataset);
+            Classifier classifier = loadInstance(spec.getName(), Classifier.class);
+            ((OptionHandler) classifier).setOptions(spec.getOptions());
+            classifier.buildClassifier(instances);
             return classifier;
         } catch (Exception ex) {
-            throw CheckedException.create(ex);
-        }
-    }
-
-    public static Evaluation crossValidateModel(Classifier classifier, Instances dataset, int numFolds, int seed) {
-        try {
-            Evaluation evaluation = new Evaluation(dataset);
-            evaluation.crossValidateModel(classifier, dataset, numFolds, new Random(seed));
-            return evaluation;
-        } catch (Exception ex) {
-            throw CheckedException.create(ex);
+            throw UncheckedException.create(ex);
         }
     }
     
-    private static String optionsNotNull(String options) {
-        return options != null ? options : "";
+    private static URL toURL(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (MalformedURLException ex) {
+            throw UncheckedException.create(ex);
+        }
     }
-
+    
+    private static Instances readInternal(URL url) {
+        try {
+            DataSource source = new DataSource(url.toExternalForm()); 
+            return source.getDataSet();
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+    }
+    
+    private static void writeInternal(Instances instances, Path outpath) {
+        try {
+            DataSink.write(outpath.toString(), instances);
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     private static <T extends Object> T loadInstance(String name, Class<T> type) {
         
@@ -112,6 +117,7 @@ public class DatasetUtils {
                 "weka.classifiers.bayes",
                 "weka.classifiers.functions",
                 "weka.classifiers.lazy",
+                "weka.classifiers.rules",
                 "weka.classifiers.trees",
                 "weka.classifiers");
         
@@ -136,5 +142,52 @@ public class DatasetUtils {
         AssertState.isEqual(1, fqnames.size(), "Ambiguous " + type.getSimpleName() + " name: " + fqnames);
         
         return instances.get(0);
+    }
+    
+    public static class OperatorSpec {
+        
+        private final String name;
+        private final String[] options;
+        
+        public OperatorSpec(String spec) {
+            this(name(spec), options(spec));
+        }
+        
+        public OperatorSpec(String name, String options) {
+            this(name, optionsNotNull(options).split(" "));
+        }
+        
+        public OperatorSpec(String name, String[] options) {
+            AssertArg.notNull(name, "Null name");
+            AssertArg.notNull(options, "Null options");
+            this.name = name;
+            this.options = options;
+        }
+        
+        public String getName() {
+            return name;
+        }
+
+        public String[] getOptions() {
+            return options;
+        }
+
+        private static String name(String spec) {
+            int idx = spec.indexOf(" ");
+            return idx > 0 ? spec.substring(0, idx) : spec;
+        }
+
+        private static String options(String spec) {
+            int idx = spec.indexOf(" ");
+            return idx > 0 ? spec.substring(idx + 1) : "";
+        }
+
+        private static String optionsNotNull(String options) {
+            return options != null ? options : "";
+        }
+        
+        public String toString() {
+            return name + " " + Arrays.asList(options);
+        }
     }
 }

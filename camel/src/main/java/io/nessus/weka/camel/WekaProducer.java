@@ -145,7 +145,7 @@ public class WekaProducer extends DefaultProducer {
         AssertState.notNull(name, "Cannot obtain filter name from: " + getEndpoint().getEndpointUri());
         Instances dataset = assertInstancesBody(exchange);
         
-        dataset = DatasetUtils.applyFilter(dataset, name, options);
+        dataset = DatasetUtils.applyFilter(dataset, new DatasetUtils.OperatorSpec(name, options));
         return dataset;
     }
 

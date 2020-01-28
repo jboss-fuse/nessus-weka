@@ -1,31 +1,30 @@
 package io.nessus.weka.test.part01;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import io.nessus.weka.Dataset;
 import io.nessus.weka.testing.AbstractWekaTest;
-import io.nessus.weka.utils.DatasetUtils;
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 
 public class DecisionTreeTest extends AbstractWekaTest {
     
     @Test
     public void testJ48() throws Exception {
         
-        DataSource source = new DataSource("data/sfny.arff");   
-        Instances dataset = source.getDataSet();
+        Evaluation eval = Dataset.create("data/sfny.arff")
         
-        // Setting class attribute 
-        dataset.setClass(dataset.attribute("in_sf"));
+                .classifier("J48")
+                
+                .consumeClassifier(cl -> logInfo("{}", cl))
+                
+                .crossValidateModel(10, 1)
+                
+                .getEvaluation();
+                
+        logInfo("{}", eval.toSummaryString(false)); 
+        
+        Assert.assertEquals("85.3659", String.format("%.4f", eval.pctCorrect()));
 
-        // Build the J48 classifier
-        Classifier classifier = DatasetUtils.buildClassifier(dataset, "J48", "");
-        logInfo("{}", classifier);
-
-        // Evaluate with 10 fold cross validation
-        Evaluation eval = DatasetUtils.crossValidateModel(classifier, dataset, 10, 1);
-        logInfo(eval.toSummaryString(false));
     }
 }

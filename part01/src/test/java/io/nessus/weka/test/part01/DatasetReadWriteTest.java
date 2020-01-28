@@ -30,7 +30,7 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
     @Test
     public void testDatasetWrite() throws Exception {
         
-        Instances data = Dataset.read("data/sfny.csv")
+        Instances data = Dataset.create("data/sfny.csv")
                 
                 // Convert the 'in_sf' attribute to nominal
                 .apply("NumericToNominal -R first")
@@ -39,13 +39,13 @@ public class DatasetReadWriteTest extends AbstractWekaTest {
                 .apply("Reorder -R 2-last,1")
                 
                 // Reset the relation name
-                .accept(ds -> ds.setRelationName("sfny"))
+                .rename("sfny")
 
                 // Write out the resulting dataset
                 .write("data/sfny.arff")
                 
                 // Get the Weka instances
-                .get();
+                .getInstances();
 
         Assert.assertEquals("sfny", data.relationName());
         
