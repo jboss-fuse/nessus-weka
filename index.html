@@ -438,7 +438,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Thomas Diesler</span><br>
 <span id="revnumber">version 1.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-01-28</span>
+<span id="revdate">2020-01-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -447,7 +447,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_data_inputoutput">2. Data Input/Output</a>
 <ul class="sectlevel2">
 <li><a href="#_preparing_for_classification">2.1. Preparing for Classification</a></li>
-<li><a href="#_camel_weka">2.2. Camel-Weka</a></li>
 </ul>
 </li>
 <li><a href="#_classification">3. Classification</a>
@@ -462,6 +461,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_confusion_matrix">3.8. Confusion Matrix</a></li>
 </ul>
 </li>
+<li><a href="#_camel_weka">4. Camel-Weka</a></li>
 </ul>
 </div>
 </div>
@@ -640,7 +640,7 @@ Instead, we moved it to the last position where Weka expects to see the class at
     .apply("Reorder -R 2-last,1")
 
     // Reset the relation name
-    .rename("sfny")
+    .apply("RenameRelation -modify sfny")
 
     // Write out the resulting dataset
     .write("data/sfny.arff");</code></pre>
@@ -664,41 +664,6 @@ Instead, we moved it to the last position where Weka expects to see the class at
 </div>
 <div class="paragraph">
 <p>Which one of those attributes is a good candidate for initial class discrimination? Have a guess &#8230;&#8203;</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_camel_weka">2.2. Camel-Weka</h3>
-<div class="paragraph">
-<p>Wouldn&#8217;t it be great if we could do all of the above in a declarative way as part of an integration workflow with <a href="https://camel.apache.org" target="_blank" rel="noopener">Camel</a>?</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext();
-
-camelctx.addRoutes(new RouteBuilder() {
-
-    @Override
-    public void configure() throws Exception {
-
-        // Use the file component to read the CSV file
-        from("file:src/test/resources/data?fileName=sfny.csv&amp;noop=true")
-
-        // The output from the file component is the input to the weka componnet
-        .to("weka:read")
-
-        // Convert the 'in_sf' attribute to nominal
-        .to("weka:filter?name=NumericToNominal&amp;options=-R first")
-
-        // Move the 'in_sf' attribute to the end
-        .to("weka:filter?name=Reorder&amp;options=-R 2-last,1")
-
-        // Write out the resulting dataset
-        .to("weka:write?relation=sfny&amp;outPath=target/sfny.arff")
-    }
-});
-
-camelctx.start();</code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -848,7 +813,7 @@ Given the same seed the randomizer produces the same sequence of numbers - below
 
         .apply("Randomize -S 0")
 
-        .rename("sfny-random")
+        .apply("RenameRelation -modify sfny-random")
 
         .write("data/sfny-random.arff");
 
@@ -858,17 +823,17 @@ int lastTestIdx = firstTrainIdx - 1;
 
 Dataset trainset = new Dataset(rndset.getInstances())
 
-        .applyToInstances((in) -&gt; applyFilter(in, "RemoveRange -R 1-" + lastTestIdx))
+        .apply("RemoveRange -R 1-" + lastTestIdx)
 
-        .rename("sfny-train")
+        .apply("RenameRelation -modify sfny-train")
 
         .write("data/sfny-80pct.arff");
 
 Dataset testset = new Dataset(rndset.getInstances())
 
-        .applyToInstances((in) -&gt; applyFilter(in, "RemoveRange -R " + firstTrainIdx + "-" + numTotal))
+        .apply("RemoveRange -R " + firstTrainIdx + "-" + numTotal)
 
-        .rename("sfny-test")
+        .apply("RenameRelation -modify sfny-test")
 
         .write("data/sfny-20pct.arff");
 
@@ -951,7 +916,7 @@ It this case, the model would likely be biased on SF homes.</p>
 
         .apply("StratifiedRemoveFolds -N 5")
 
-        .rename("sfny-test")
+        .apply("RenameRelation -modify sfny-test")
 
         .write("data/sfny-20pct-strat.arff")
 
@@ -962,7 +927,7 @@ It this case, the model would likely be biased on SF homes.</p>
 
         .apply("StratifiedRemoveFolds -N 5 -V")
 
-        .rename("sfny-train")
+        .apply("RenameRelation -modify sfny-train")
 
         .write("data/sfny-80pct-strat.arff")
 
@@ -1172,11 +1137,84 @@ Each split is then performed such that it yields to the maximum of information g
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_camel_weka">4. Camel-Weka</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Camel-Weka moves this functionality one level up and provides Weka Data Minig as part of a <a href="https://camel.apache.org/" target="_blank" rel="noopener">Camel</a> workflow. There are hundreds of components available in Camel. Data can be obtained from a wide array of data sources, then be passed on to the Camel-Weka component for analysis and desicion making with the results
+yet again being passed on to other components for further processing.</p>
+</div>
+<div class="paragraph">
+<p>This first example shows how to read a CSV file with the file component and then
+pass it on to Weka. In Weka we apply a few filters to the data set and then pass it on to
+the file component for writing.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext();
+camelctx.addRoutes(new RouteBuilder() {
+
+    @Override
+    public void configure() throws Exception {
+
+        // Use the file component to read the CSV file
+        from("file:src/test/resources/data?fileName=sfny.csv&amp;noop=true")
+
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?apply=NumericToNominal -R first")
+
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?apply=Reorder -R 2-last,1")
+
+        // Rename the relation
+        .to("weka:filter?apply=RenameRelation -modify sfny")
+
+        // Use the file component to write the Arff file
+        .to("file:target/data?fileName=sfny.arff")
+    }
+});
+camelctx.start();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second example does the same as above without use of the file component.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext();
+camelctx.addRoutes(new RouteBuilder() {
+
+    @Override
+    public void configure() throws Exception {
+
+        from("direct:start")
+
+        // Use Weka to read the CSV file
+        .to("weka:read?path=src/test/resources/data/sfny.csv")
+
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?apply=NumericToNominal -R first")
+
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?apply=Reorder -R 2-last,1")
+
+        // Rename the relation
+        .to("weka:filter?apply=RenameRelation -modify sfny")
+
+        // Use Weka to write the Arff file
+        .to("weka:write?path=target/data/sfny.arff");
+    }
+});
+camelctx.start();</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 1.0.0-SNAPSHOT<br>
-Last updated 2020-01-28 16:38:47 CET
+Last updated 2020-01-29 14:04:28 CET
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
