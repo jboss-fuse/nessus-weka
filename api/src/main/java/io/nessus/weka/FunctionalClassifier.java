@@ -5,21 +5,23 @@ import java.util.function.UnaryOperator;
 
 import weka.classifiers.Classifier;
 
-public interface FunctionalClassifier extends FunctionalInstances {
+public interface FunctionalClassifier<T extends Dataset> {
 
-    FunctionalClassifier applyToFunctionalClassifier(UnaryOperator<FunctionalClassifier> operator);
+    T applyToFunctionalClassifier(UnaryOperator<FunctionalClassifier<T>> operator);
 
-    FunctionalClassifier applyToClassifier(UnaryOperator<Classifier> operator);
+    T applyToClassifier(UnaryOperator<Classifier> operator);
 
-    FunctionalClassifier consumeFunctionalClassifier(Consumer<FunctionalClassifier> consumer);
+    T consumeFunctionalClassifier(Consumer<FunctionalClassifier<T>> consumer);
 
-    FunctionalClassifier consumeClassifier(Consumer<Classifier> consumer);
+    T consumeClassifier(Consumer<Classifier> consumer);
 
-    FunctionalEvaluation crossValidateModel(int numFolds, int seed);
+    T crossValidateModel(int numFolds, int seed);
 
-    FunctionalEvaluation evaluateModel(Dataset dataset);
+    T evaluateModel(Dataset dataset);
 
-    FunctionalEvaluation evaluate();
+    T evaluateModel();
+
+    T evaluate();
 
     Classifier getClassifier();
 

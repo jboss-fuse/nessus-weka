@@ -7,45 +7,45 @@ import java.util.function.UnaryOperator;
 
 import weka.core.Instances;
 
-public interface FunctionalInstances {
+public interface FunctionalInstances<T extends Dataset> {
 
-    Dataset read(URL url);
+    T read(URL url);
     
-    Dataset read(Path inpath);
+    T read(Path inpath);
     
-    Dataset read(String inpath);
+    T read(String inpath);
     
-    Dataset write(Path outpath);
+    T write(Path outpath);
 
-    Dataset write(String outpath);
+    T write(String outpath);
 
-    Dataset push();
+    T push();
     
-    Dataset pushTrainingSet();
+    T pushTrainingSet();
     
-    Dataset pushTestSet();
+    T pushTestSet();
     
-    Dataset push(String name);
+    T push(String name);
     
-    Dataset pop();
+    T pop();
     
-    Dataset popTrainingSet();
+    T popTrainingSet();
     
-    Dataset popTestSet();
+    T popTestSet();
     
-    Dataset pop(String name);
+    T pop(String name);
     
-    Dataset filter(String filterSpec);
+    T apply(String filterSpec);
 
-    FunctionalClassifier classifier(String classifierSpec);
+    T classifier(String classifierSpec);
     
-    Dataset applyToFunctionalInstances(UnaryOperator<FunctionalInstances> operator);
+    T applyToFunctionalInstances(UnaryOperator<FunctionalInstances<T>> operator);
 
-    Dataset applyToInstances(UnaryOperator<Instances> operator);
+    T applyToInstances(UnaryOperator<Instances> operator);
 
-    Dataset consumeFunctionalInstances(Consumer<FunctionalInstances> consumer);
+    T consumeFunctionalInstances(Consumer<FunctionalInstances<T>> consumer);
 
-    Dataset consumeInstances(Consumer<Instances> consumer);
+    T consumeInstances(Consumer<Instances> consumer);
     
     Instances getInstances();
 }

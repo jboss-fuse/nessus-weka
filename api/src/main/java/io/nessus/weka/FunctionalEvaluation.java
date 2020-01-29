@@ -5,15 +5,15 @@ import java.util.function.UnaryOperator;
 
 import weka.classifiers.Evaluation;
 
-public interface FunctionalEvaluation extends FunctionalClassifier {
+public interface FunctionalEvaluation<T extends Dataset> {
 
-    FunctionalEvaluation applyToFunctionalEvaluation(UnaryOperator<FunctionalEvaluation> operator);
+    T applyToFunctionalEvaluation(UnaryOperator<FunctionalEvaluation<T>> operator);
 
-    FunctionalEvaluation applyToEvaluation(UnaryOperator<Evaluation> operator);
+    T applyToEvaluation(UnaryOperator<Evaluation> operator);
 
-    FunctionalEvaluation consumeFunctionalEvaluation(Consumer<FunctionalEvaluation> consumer);
+    T consumeFunctionalEvaluation(Consumer<FunctionalEvaluation<T>> consumer);
 
-    FunctionalEvaluation consumeEvaluation(Consumer<Evaluation> consumer);
+    T consumeEvaluation(Consumer<Evaluation> consumer);
 
     Evaluation getEvaluation();
 }

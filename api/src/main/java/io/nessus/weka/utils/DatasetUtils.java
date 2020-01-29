@@ -1,6 +1,7 @@
 package io.nessus.weka.utils;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,8 +16,11 @@ import io.nessus.weka.UncheckedException;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.converters.Loader;
 import weka.filters.Filter;
 
 public class DatasetUtils {
@@ -30,13 +34,53 @@ public class DatasetUtils {
     }
     
     public static Instances read(Path inpath) {
-        return readInternal(toURL(inpath));
+        return readInternal(inpath);
     }
 
     public static Instances read(String inpath) {
         return read(Paths.get(inpath));
     }
 
+    public static Instances read(InputStream input) {
+        
+        Instances instances = null;
+        
+        try {
+            
+            if (input.markSupported())
+                input.mark(10240);
+            
+            // First try .arff
+            try {
+                Loader loader = new ArffLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                instances = loader.getDataSet();
+            } catch (IOException ex) {
+                String exmsg = ex.getMessage();
+                if (!exmsg.contains("Unable to determine structure as arff")) {
+                    throw ex;
+                }
+                if (input.markSupported()) {
+                    input.reset();
+                }
+            }
+            
+            // Next try .csv
+            if (instances == null) {
+                Loader loader = new CSVLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                instances = loader.getDataSet();
+            }
+            
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+        
+        return instances;
+    }
+    
     public static void write(Instances instances, Path outpath) {
         writeInternal(instances, outpath);
     }
@@ -80,10 +124,11 @@ public class DatasetUtils {
         }
     }
     
-    private static URL toURL(Path path) {
+    private static Instances readInternal(Path inpath) {
         try {
-            return path.toUri().toURL();
-        } catch (MalformedURLException ex) {
+            DataSource source = new DataSource(inpath.toString()); 
+            return source.getDataSet();
+        } catch (Exception ex) {
             throw UncheckedException.create(ex);
         }
     }

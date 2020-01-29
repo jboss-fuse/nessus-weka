@@ -20,7 +20,7 @@ public class OneRTest extends AbstractWekaTest {
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         
-            .evaluateModel(dataset)
+            .evaluateModel()
             
             .getEvaluation();
         

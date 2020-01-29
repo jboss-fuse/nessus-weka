@@ -1,7 +1,5 @@
 package io.nessus.weka.test.part01;
 
-import static io.nessus.weka.utils.DatasetUtils.applyFilter;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,9 +13,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
         
         Dataset rndset = Dataset.create("data/sfny.arff")
                 
-                .filter("Randomize -S 0")
+                .apply("Randomize -S 0")
                 
-                .filter("RenameRelation -modify sfny-random")
+                .apply("RenameRelation -modify sfny-random")
                 
                 .write("data/sfny-random.arff");
                 
@@ -25,33 +23,33 @@ public class DatasetSplitTest extends AbstractWekaTest {
         int firstTrainIdx = (int) Math.round(numTotal * 0.20);
         int lastTestIdx = firstTrainIdx - 1;
         
-        Dataset trainset = new Dataset(rndset.getInstances())
+        Dataset trainset = Dataset.create(rndset.getInstances())
                 
                 .consumeInstances((in) -> logInfo("Instances: {}", in.numInstances()))
                 
                 .consumeInstances((in) -> logInfo("Removing:  1-{}", lastTestIdx))
                 
-                .applyToInstances((in) -> applyFilter(in, "RemoveRange -R 1-" + lastTestIdx))
+                .apply("RemoveRange -R 1-" + lastTestIdx)
                 
                 .consumeInstances((in) -> logInfo("Training:  {}-{} ({})", firstTrainIdx, numTotal, in.numInstances()))
                 
-                .filter("RenameRelation -modify sfny-train")
+                .apply("RenameRelation -modify sfny-train")
                 
                 .write("data/sfny-80pct.arff");
         
         logInfo();
         
-        Dataset testset = new Dataset(rndset.getInstances())
+        Dataset testset = Dataset.create(rndset.getInstances())
                 
                 .consumeInstances((in) -> logInfo("Instances: {}", in.numInstances()))
                 
                 .consumeInstances((in) -> logInfo("Removing:  {}-{}", firstTrainIdx, numTotal))
                 
-                .applyToInstances((in) -> applyFilter(in, "RemoveRange -R " + firstTrainIdx + "-" + numTotal))
+                .apply("RemoveRange -R " + firstTrainIdx + "-" + numTotal)
                 
                 .consumeInstances((in) -> logInfo("Testing:   1-{} ({})", lastTestIdx, in.numInstances()))
                 
-                .filter("RenameRelation -modify sfny-test")
+                .apply("RenameRelation -modify sfny-test")
                 
                 .write("data/sfny-20pct.arff");
                 
@@ -68,9 +66,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .push()
                 
-                .filter("StratifiedRemoveFolds -N 5")
+                .apply("StratifiedRemoveFolds -N 5")
                 
-                .filter("RenameRelation -modify sfny-test")
+                .apply("RenameRelation -modify sfny-test")
                 
                 .write("data/sfny-20pct-strat.arff")
                 
@@ -78,9 +76,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .pop()
                 
-                .filter("StratifiedRemoveFolds -N 5 -V")
+                .apply("StratifiedRemoveFolds -N 5 -V")
                 
-                .filter("RenameRelation -modify sfny-train")
+                .apply("RenameRelation -modify sfny-train")
                 
                 .write("data/sfny-80pct-strat.arff")
                 
