@@ -19,7 +19,7 @@ Dataset dataset = Dataset.create("data/sfny.arff");
 
 Evaluation eval = dataset
 
-    .classifier("ZeroR")
+    .buildClassifier("ZeroR")
     
     .evaluateModel(dataset)
     
@@ -63,7 +63,7 @@ Dataset dataset = Dataset.create("data/sfny.arff");
 
 Evaluation eval = dataset
 
-    .classifier("OneR")
+    .buildClassifier("OneR")
     
     .evaluateModel(dataset)
     
@@ -165,7 +165,7 @@ Dataset testing = Dataset.create("data/sfny-20pct.arff");
 
 Evaluation eval = training
 
-    .classifier("OneR")
+    .buildClassifier("OneR")
     
     .evaluateModel(testing)
     
@@ -281,7 +281,7 @@ Dataset dataset = Dataset.create("data/sfny.arff");
 
 Evaluation eval = dataset
 
-    .classifier("OneR")
+    .buildClassifier("OneR")
     
     .crossValidateModel(10, 1)
 
@@ -330,7 +330,7 @@ Dataset dataset = Dataset.create("data/sfny.arff");
 
 Evaluation eval = dataset
 
-    .classifier("J48")
+    .buildClassifier("J48")
     
     .crossValidateModel(10, 1)
 

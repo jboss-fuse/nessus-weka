@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.nessus.weka.LogSupport;
+
 /**
  * @author tdiesler@redhat.com
  * @since 2019-09-05

@@ -1,4 +1,4 @@
-package io.nessus.weka.testing;
+package io.nessus.weka;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

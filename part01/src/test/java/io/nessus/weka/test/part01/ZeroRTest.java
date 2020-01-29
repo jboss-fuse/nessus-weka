@@ -16,7 +16,7 @@ public class ZeroRTest extends AbstractWekaTest {
         
         Evaluation eval = dataset
         
-            .classifier("ZeroR")
+            .buildClassifier("ZeroR")
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         

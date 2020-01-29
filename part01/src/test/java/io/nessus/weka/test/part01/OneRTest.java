@@ -16,7 +16,7 @@ public class OneRTest extends AbstractWekaTest {
         
         Evaluation eval = dataset
         
-            .classifier("OneR")
+            .buildClassifier("OneR")
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         
@@ -37,7 +37,7 @@ public class OneRTest extends AbstractWekaTest {
         
         Evaluation eval = training
         
-            .classifier("OneR")
+            .buildClassifier("OneR")
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         
@@ -58,7 +58,7 @@ public class OneRTest extends AbstractWekaTest {
         
         Evaluation eval = training
         
-            .classifier("OneR")
+            .buildClassifier("OneR")
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         
@@ -78,7 +78,7 @@ public class OneRTest extends AbstractWekaTest {
         
         Evaluation eval = dataset
         
-            .classifier("OneR")
+            .buildClassifier("OneR")
             
             .consumeClassifier(cl -> logInfo("{}", cl))
         

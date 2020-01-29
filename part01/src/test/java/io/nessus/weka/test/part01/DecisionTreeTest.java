@@ -14,7 +14,7 @@ public class DecisionTreeTest extends AbstractWekaTest {
         
         Evaluation eval = Dataset.create("data/sfny.arff")
         
-                .classifier("J48")
+                .buildClassifier("J48")
                 
                 .consumeClassifier(cl -> logInfo("{}", cl))
                 

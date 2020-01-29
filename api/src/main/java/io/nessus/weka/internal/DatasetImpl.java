@@ -1,4 +1,4 @@
-package io.nessus.weka;
+package io.nessus.weka.internal;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -7,8 +7,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import io.nessus.weka.AssertArg;
+import io.nessus.weka.AssertState;
+import io.nessus.weka.Dataset;
+import io.nessus.weka.FunctionalClassifier;
+import io.nessus.weka.FunctionalEvaluation;
+import io.nessus.weka.FunctionalInstances;
+import io.nessus.weka.UncheckedException;
 import io.nessus.weka.utils.DatasetUtils;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -27,10 +35,15 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     private Instances instances;
 
     public DatasetImpl(Instances instances) {
+        this.instances = setClassIndex(instances);
+    }
+
+    /**
+     * Guess the class index if not set already
+     */
+    private Instances setClassIndex(Instances instances) {
         AssertArg.notNull(instances, "Null instances");
-        this.instances = instances;
         
-        // Guess the class attribute if not set already
         if (instances.classIndex() < 0) {
             Attribute attr = instances.attribute("class");
             if (attr != null) {
@@ -43,29 +56,27 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
                 }
             }
         }
+        return instances;
     }
     
     @Override
     public Dataset read(Path inpath) {
         Instances result = DatasetUtils.read(inpath);
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(String inpath) {
         Instances result = DatasetUtils.read(Paths.get(inpath));
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(URL url) {
         Instances result = DatasetUtils.read(url);
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
     
@@ -89,8 +100,7 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset applyToInstances(UnaryOperator<Instances> operator) {
         Instances result = operator.apply(instances);
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
     
@@ -101,8 +111,16 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     }
 
     @Override
-    public Dataset classifier(String classifierSpec) {
+    public Dataset buildClassifier(String classifierSpec) {
         Classifier result = DatasetUtils.buildClassifier(getInstances(), classifierSpec);
+        AssertState.notNull(result, "Null classifier");
+        classifier = result;
+        return this;
+    }
+    
+    @Override
+    public Dataset loadClassifier(Supplier<Classifier> supplier) {
+        Classifier result = supplier.get();
         AssertState.notNull(result, "Null classifier");
         classifier = result;
         return this;
@@ -153,8 +171,7 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset pop(String name) {
         Instances result = storage.remove(name);
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
 
@@ -166,8 +183,7 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset applyToFunctionalInstances(UnaryOperator<FunctionalInstances<Dataset>> operator) {
         Instances result = operator.apply(this).getInstances();
-        AssertState.notNull(result, "Null instances");
-        instances = result;
+        instances = setClassIndex(result);
         return this;
     }
 

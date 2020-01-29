@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 
+import io.nessus.weka.internal.DatasetImpl;
 import io.nessus.weka.utils.DatasetUtils;
 import weka.core.Instances;
 
