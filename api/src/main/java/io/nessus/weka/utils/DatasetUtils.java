@@ -1,5 +1,6 @@
 package io.nessus.weka.utils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -104,10 +105,71 @@ public class DatasetUtils {
             String fileName = inpath.getFileName().toString();
             if (instances == null && fileName.endsWith(".csv")) {
                 
+                try (InputStream input = new FileInputStream(inpath.toFile())) {
+                    instances = readInternal(input);
+                }
+                
+            } else {
+                
+                DataSource source = new DataSource(inpath.toString()); 
+                instances = source.getDataSet();
+                
+            }
+            
+            return instances;
+            
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+    }
+    
+    private static Instances readInternal(URL url) {
+        
+        // https://github.com/tdiesler/weka-3.8/issues/7
+        String externalForm = url.toExternalForm();
+        if (externalForm.startsWith("file:")) {
+            Path inpath = Paths.get(url.getPath());
+            return read(inpath);
+        }
+        
+        try {
+            DataSource source = new DataSource(externalForm); 
+            return source.getDataSet();
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+    }
+    
+    private static Instances readInternal(InputStream input) {
+        
+        Instances instances = null;
+        
+        try {
+            
+            // https://github.com/tdiesler/weka-3.8/issues/6
+            input = new BufferedInputStream(input);
+            input.mark(10240);
+            
+            // First try .arff
+            try {
+                Loader loader = new ArffLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                instances = loader.getDataSet();
+            } catch (IOException ex) {
+                String exmsg = ex.getMessage();
+                if (!exmsg.contains("Unable to determine structure as arff")) {
+                    throw ex;
+                }
+                input.reset();
+            }
+            
+            // Next try .csv
+            if (instances == null) {
+
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(baos));
                 
-                InputStream input = new FileInputStream(inpath.toFile());
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
                     String line = br.readLine();
                     while (line != null) {
@@ -124,60 +186,6 @@ public class DatasetUtils {
                 
                 Loader loader = new CSVLoader();
                 loader.setSource(input);
-                instances = loader.getDataSet();
-                
-            } else {
-                
-                DataSource source = new DataSource(inpath.toString()); 
-                instances = source.getDataSet();
-            }
-            
-            return instances;
-            
-        } catch (Exception ex) {
-            throw UncheckedException.create(ex);
-        }
-    }
-    
-    private static Instances readInternal(URL url) {
-        try {
-            DataSource source = new DataSource(url.toExternalForm()); 
-            return source.getDataSet();
-        } catch (Exception ex) {
-            throw UncheckedException.create(ex);
-        }
-    }
-    
-    private static Instances readInternal(InputStream input) {
-        
-        Instances instances = null;
-        
-        try {
-            
-            if (input.markSupported())
-                input.mark(10240);
-            
-            // First try .arff
-            try {
-                Loader loader = new ArffLoader();
-                loader.setSource(input);
-                loader.getStructure();
-                instances = loader.getDataSet();
-            } catch (IOException ex) {
-                String exmsg = ex.getMessage();
-                if (!exmsg.contains("Unable to determine structure as arff")) {
-                    throw ex;
-                }
-                if (input.markSupported()) {
-                    input.reset();
-                }
-            }
-            
-            // Next try .csv
-            if (instances == null) {
-                Loader loader = new CSVLoader();
-                loader.setSource(input);
-                loader.getStructure();
                 instances = loader.getDataSet();
             }
             

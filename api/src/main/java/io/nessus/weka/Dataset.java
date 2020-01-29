@@ -17,8 +17,8 @@ public abstract class Dataset implements FunctionalEvaluation<Dataset>, Function
         return create(DatasetUtils.read(inpath));
     }
 
-    public static Dataset create(URL inpath) {
-        return create(DatasetUtils.read(inpath));
+    public static Dataset create(URL inurl) {
+        return create(DatasetUtils.read(inurl));
     }
 
     public static Dataset create(InputStream input) {
