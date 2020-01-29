@@ -123,7 +123,7 @@ Dataset rndset = Dataset.create("data/sfny.arff")
         
         .apply("Randomize -S 0")
         
-        .rename("sfny-random")
+        .apply("RenameRelation -modify sfny-random")
         
         .write("data/sfny-random.arff");
         
@@ -133,17 +133,17 @@ int lastTestIdx = firstTrainIdx - 1;
 
 Dataset trainset = new Dataset(rndset.getInstances())
         
-        .applyToInstances((in) -> applyFilter(in, "RemoveRange -R 1-" + lastTestIdx))
+        .apply("RemoveRange -R 1-" + lastTestIdx)
         
-        .rename("sfny-train")
+        .apply("RenameRelation -modify sfny-train")
         
         .write("data/sfny-80pct.arff");
 
 Dataset testset = new Dataset(rndset.getInstances())
         
-        .applyToInstances((in) -> applyFilter(in, "RemoveRange -R " + firstTrainIdx + "-" + numTotal))
+        .apply("RemoveRange -R " + firstTrainIdx + "-" + numTotal)
         
-        .rename("sfny-test")
+        .apply("RenameRelation -modify sfny-test")
         
         .write("data/sfny-20pct.arff");
         
@@ -217,7 +217,7 @@ Dataset dataset = Dataset.create("data/sfny.arff")
         
         .apply("StratifiedRemoveFolds -N 5")
         
-        .rename("sfny-test")
+        .apply("RenameRelation -modify sfny-test")
         
         .write("data/sfny-20pct-strat.arff")
         
@@ -228,7 +228,7 @@ Dataset dataset = Dataset.create("data/sfny.arff")
         
         .apply("StratifiedRemoveFolds -N 5 -V")
         
-        .rename("sfny-train")
+        .apply("RenameRelation -modify sfny-train")
         
         .write("data/sfny-80pct-strat.arff")
         

@@ -1,7 +1,14 @@
 package io.nessus.weka.utils;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,47 +45,11 @@ public class DatasetUtils {
     }
 
     public static Instances read(String inpath) {
-        return read(Paths.get(inpath));
+        return readInternal(Paths.get(inpath));
     }
 
     public static Instances read(InputStream input) {
-        
-        Instances instances = null;
-        
-        try {
-            
-            if (input.markSupported())
-                input.mark(10240);
-            
-            // First try .arff
-            try {
-                Loader loader = new ArffLoader();
-                loader.setSource(input);
-                loader.getStructure();
-                instances = loader.getDataSet();
-            } catch (IOException ex) {
-                String exmsg = ex.getMessage();
-                if (!exmsg.contains("Unable to determine structure as arff")) {
-                    throw ex;
-                }
-                if (input.markSupported()) {
-                    input.reset();
-                }
-            }
-            
-            // Next try .csv
-            if (instances == null) {
-                Loader loader = new CSVLoader();
-                loader.setSource(input);
-                loader.getStructure();
-                instances = loader.getDataSet();
-            }
-            
-        } catch (Exception ex) {
-            throw UncheckedException.create(ex);
-        }
-        
-        return instances;
+        return readInternal(input);
     }
     
     public static void write(Instances instances, Path outpath) {
@@ -126,8 +97,43 @@ public class DatasetUtils {
     
     private static Instances readInternal(Path inpath) {
         try {
-            DataSource source = new DataSource(inpath.toString()); 
-            return source.getDataSet();
+            
+            Instances instances = null;
+            
+            // https://github.com/tdiesler/weka-3.8/issues/6
+            String fileName = inpath.getFileName().toString();
+            if (instances == null && fileName.endsWith(".csv")) {
+                
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(baos));
+                
+                InputStream input = new FileInputStream(inpath.toFile());
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+                    String line = br.readLine();
+                    while (line != null) {
+                        if (!line.startsWith("#")) {
+                            bw.write(line);
+                            bw.newLine();
+                        }
+                        line = br.readLine();
+                    }
+                    bw.flush();
+                }
+
+                input = new ByteArrayInputStream(baos.toByteArray());
+                
+                Loader loader = new CSVLoader();
+                loader.setSource(input);
+                instances = loader.getDataSet();
+                
+            } else {
+                
+                DataSource source = new DataSource(inpath.toString()); 
+                instances = source.getDataSet();
+            }
+            
+            return instances;
+            
         } catch (Exception ex) {
             throw UncheckedException.create(ex);
         }
@@ -140,6 +146,46 @@ public class DatasetUtils {
         } catch (Exception ex) {
             throw UncheckedException.create(ex);
         }
+    }
+    
+    private static Instances readInternal(InputStream input) {
+        
+        Instances instances = null;
+        
+        try {
+            
+            if (input.markSupported())
+                input.mark(10240);
+            
+            // First try .arff
+            try {
+                Loader loader = new ArffLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                instances = loader.getDataSet();
+            } catch (IOException ex) {
+                String exmsg = ex.getMessage();
+                if (!exmsg.contains("Unable to determine structure as arff")) {
+                    throw ex;
+                }
+                if (input.markSupported()) {
+                    input.reset();
+                }
+            }
+            
+            // Next try .csv
+            if (instances == null) {
+                Loader loader = new CSVLoader();
+                loader.setSource(input);
+                loader.getStructure();
+                instances = loader.getDataSet();
+            }
+            
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+        
+        return instances;
     }
     
     private static void writeInternal(Instances instances, Path outpath) {

@@ -25,6 +25,4 @@ include::data-inout/index.adoc[]
 
 include::classification/index.adoc[]
 
-// include::regression/index.adoc[]
-// include::boosting/index.adoc[]
-
+include::camel-weka/index.adoc[]
