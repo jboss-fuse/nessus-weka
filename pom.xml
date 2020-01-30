@@ -20,6 +20,7 @@
     </scm>
     
     <properties>
+        <version.apache.camel>3.1.0-SNAPSHOT</version.apache.camel>
         <version.waikato.weka>3.8.4</version.waikato.weka>
         <version.junit>4.11</version.junit>
         <version.slf4j>1.7.28</version.slf4j>
@@ -40,11 +41,22 @@
     <modules>
         <module>api</module>
         <module>docs</module>
+        <module>camel</module>
         <module>part01</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-core</artifactId>
+                <version>${version.apache.camel}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-weka</artifactId>
+                <version>${version.apache.camel}</version>
+            </dependency>
 			<dependency>
 			    <groupId>nz.ac.waikato.cms.weka</groupId>
 			    <artifactId>weka-stable</artifactId>

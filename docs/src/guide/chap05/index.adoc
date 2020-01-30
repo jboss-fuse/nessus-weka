@@ -1,5 +1,5 @@
 
-## Extending the API
+## Nessus API Concepts
 
 The Nessus-Weka API is here to compliment rather than duplicate or reinvent functionality that is already present in Weka APIs.
 

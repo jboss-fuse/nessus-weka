@@ -408,7 +408,3 @@ When you right-click on the classification result, you can see the tree model vi
 Each split is then performed such that it yields to the maximum of information gain.
 
 image::chap03/j48-tree.png[J48 Tree]
-
-### Confusion Matrix
-
-To be done ...

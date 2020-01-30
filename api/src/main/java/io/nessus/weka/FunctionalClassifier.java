@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 public interface FunctionalClassifier<T extends Dataset> {
 
@@ -19,8 +18,6 @@ public interface FunctionalClassifier<T extends Dataset> {
     T loadClassifier(Supplier<Classifier> supplier);
     
     T buildClassifier(String classifierSpec);
-    
-    T predictNominal(Function<T, Instances> function);
     
     Classifier getClassifier();
 

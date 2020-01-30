@@ -141,6 +141,7 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset pop(String name) {
         Instances result = storage.remove(name);
+        AssertState.notNull(result, "Cannot find instances with name '" + name + "' on stack");
         instances = asignClassIndex(result);
         return this;
     }
@@ -300,12 +301,6 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
         return evaluation;
     }
 
-    public Dataset predictNominal(Function<Dataset, Instances> function) {
-        Instances result = function.apply(this);
-        instances = asignClassIndex(result);
-        return this;
-    }
-    
     @Override
     public Dataset consumeDataset(Consumer<Dataset> consumer) {
         consumer.accept(this);
