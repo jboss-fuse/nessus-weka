@@ -2,11 +2,12 @@ package io.nessus.weka;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import weka.classifiers.Classifier;
+import weka.core.Attribute;
 import weka.core.Instances;
 
 public interface FunctionalInstances<T extends Dataset> {
@@ -39,17 +40,13 @@ public interface FunctionalInstances<T extends Dataset> {
     
     T apply(String filterSpec);
 
-    T buildClassifier(String classifierSpec);
-    
-    T loadClassifier(Supplier<Classifier> supplier);
-    
-    T applyToFunctionalInstances(UnaryOperator<FunctionalInstances<T>> operator);
-
     T applyToInstances(UnaryOperator<Instances> operator);
 
-    T consumeFunctionalInstances(Consumer<FunctionalInstances<T>> consumer);
+    T applyToInstances(Function<T, Instances> function);
 
     T consumeInstances(Consumer<Instances> consumer);
     
+    List<Attribute> getAttributes();
+
     Instances getInstances();
 }

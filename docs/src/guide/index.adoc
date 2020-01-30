@@ -26,13 +26,15 @@ and additionally gives transparent access to well-known toolboxes such as scikit
 
 In this intro, we'll show you how to get started with simple data mining tasks and how to incorporate these into larger https://camel.apache.org[Apache Camel,window=_blank] workflows.
 
-include::getting-weka/index.adoc[]
+include::chap01/index.adoc[]
 
-include::data-inout/index.adoc[]
+include::chap02/index.adoc[]
 
-include::classification/index.adoc[]
+include::chap03/index.adoc[]
 
-include::camel-weka/index.adoc[]
+include::chap04/index.adoc[]
+
+include::chap05/index.adoc[]
 
 ## Feedback
 

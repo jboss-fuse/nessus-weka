@@ -3,10 +3,14 @@ package io.nessus.weka.internal;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -35,13 +39,13 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     private Instances instances;
 
     public DatasetImpl(Instances instances) {
-        this.instances = setClassIndex(instances);
+        this.instances = asignClassIndex(instances);
     }
 
     /**
      * Guess the class index if not set already
      */
-    private Instances setClassIndex(Instances instances) {
+    private Instances asignClassIndex(Instances instances) {
         AssertArg.notNull(instances, "Null instances");
         
         if (instances.classIndex() < 0) {
@@ -62,21 +66,21 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset read(Path inpath) {
         Instances result = DatasetUtils.read(inpath);
-        instances = setClassIndex(result);
+        instances = asignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(String inpath) {
         Instances result = DatasetUtils.read(Paths.get(inpath));
-        instances = setClassIndex(result);
+        instances = asignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(URL url) {
         Instances result = DatasetUtils.read(url);
-        instances = setClassIndex(result);
+        instances = asignClassIndex(result);
         return this;
     }
     
@@ -92,40 +96,6 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
         return this;
     }
 
-    @Override
-    public Dataset apply(String filterSpec) {
-        return applyToInstances((i) -> DatasetUtils.applyFilter(i, filterSpec));
-    }
-    
-    @Override
-    public Dataset applyToInstances(UnaryOperator<Instances> operator) {
-        Instances result = operator.apply(instances);
-        instances = setClassIndex(result);
-        return this;
-    }
-    
-    @Override
-    public Dataset consumeInstances(Consumer<Instances> consumer) {
-        consumer.accept(instances);
-        return this;
-    }
-
-    @Override
-    public Dataset buildClassifier(String classifierSpec) {
-        Classifier result = DatasetUtils.buildClassifier(getInstances(), classifierSpec);
-        AssertState.notNull(result, "Null classifier");
-        classifier = result;
-        return this;
-    }
-    
-    @Override
-    public Dataset loadClassifier(Supplier<Classifier> supplier) {
-        Classifier result = supplier.get();
-        AssertState.notNull(result, "Null classifier");
-        classifier = result;
-        return this;
-    }
-    
     @Override
     public Dataset push() {
         push(DEFAULT_SLOT);
@@ -171,8 +141,43 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset pop(String name) {
         Instances result = storage.remove(name);
-        instances = setClassIndex(result);
+        instances = asignClassIndex(result);
         return this;
+    }
+
+    @Override
+    public Dataset apply(String filterSpec) {
+        Instances result = DatasetUtils.applyFilter(getInstances(), filterSpec);
+        instances = asignClassIndex(result);
+        return this;
+    }
+    
+    @Override
+    public Dataset applyToInstances(UnaryOperator<Instances> operator) {
+        Instances result = operator.apply(instances);
+        instances = asignClassIndex(result);
+        return this;
+    }
+    
+    @Override
+    public Dataset applyToInstances(Function<Dataset, Instances> function) {
+        Instances result = function.apply(this);
+        instances = asignClassIndex(result);
+        return this;
+    }
+
+    @Override
+    public Dataset consumeInstances(Consumer<Instances> consumer) {
+        consumer.accept(instances);
+        return this;
+    }
+
+    @Override
+    public List<Attribute> getAttributes() {
+        List<Attribute> result = new ArrayList<>();
+        Enumeration<Attribute> en = instances.enumerateAttributes();
+        while (en.hasMoreElements()) result.add(en.nextElement());
+        return result;
     }
 
     @Override
@@ -181,21 +186,8 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     }
 
     @Override
-    public Dataset applyToFunctionalInstances(UnaryOperator<FunctionalInstances<Dataset>> operator) {
-        Instances result = operator.apply(this).getInstances();
-        instances = setClassIndex(result);
-        return this;
-    }
-
-    @Override
-    public Dataset consumeFunctionalInstances(Consumer<FunctionalInstances<Dataset>> consumer) {
-        consumer.accept(this);
-        return this;
-    }
-
-    @Override
-    public Dataset applyToFunctionalClassifier(UnaryOperator<FunctionalClassifier<Dataset>> operator) {
-        Classifier result = operator.apply(this).getClassifier();
+    public Dataset applyToClassifier(Function<Dataset, Classifier> function) {
+        Classifier result = function.apply(this);
         AssertState.notNull(result, "Null classifier");
         classifier = result;
         return this;
@@ -210,17 +202,66 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     }
 
     @Override
-    public Dataset consumeFunctionalClassifier(Consumer<FunctionalClassifier<Dataset>> consumer) {
-        consumer.accept(this);
-        return this;
-    }
-    
-    @Override
     public Dataset consumeClassifier(Consumer<Classifier> consumer) {
         consumer.accept(assertClassifier());
         return this;
     }
     
+    @Override
+    public Dataset buildClassifier(String classifierSpec) {
+        Classifier result = DatasetUtils.buildClassifier(getInstances(), classifierSpec);
+        AssertState.notNull(result, "Null classifier");
+        classifier = result;
+        return this;
+    }
+    
+    @Override
+    public Dataset loadClassifier(Supplier<Classifier> supplier) {
+        Classifier result = supplier.get();
+        AssertState.notNull(result, "Null classifier");
+        classifier = result;
+        return this;
+    }
+    
+    @Override
+    public Classifier getClassifier() {
+        return classifier;
+    }
+    
+    @Override
+    public Dataset applyToEvaluation(Function<Dataset, Evaluation> function) {
+        Evaluation result = function.apply(this);
+        AssertState.notNull(result, "Null evaluation");
+        evaluation = result;
+        return this;
+    }
+
+    @Override
+    public Dataset applyToEvaluation(UnaryOperator<Evaluation> operator) {
+        Evaluation result = operator.apply(assertEvaluation());
+        AssertState.notNull(result, "Null evaluation");
+        evaluation = result;
+        return this;
+    }
+
+    @Override
+    public Dataset consumeEvaluation(Consumer<Evaluation> consumer) {
+        consumer.accept(assertEvaluation());
+        return this;
+    }
+
+    @Override
+    public Dataset crossValidateModel(int numFolds, int seed) {
+        Instances data = getInstances();
+        try {
+            Evaluation ev = evaluate().getEvaluation();
+            ev.crossValidateModel(assertClassifier(), data, numFolds, new Random(seed));
+        } catch (Exception ex) {
+            throw UncheckedException.create(ex);
+        }
+        return this;
+    }
+
     @Override
     public Dataset evaluateModel(Dataset dataset) {
         try {
@@ -245,18 +286,6 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     }
     
     @Override
-    public Dataset crossValidateModel(int numFolds, int seed) {
-        Instances data = getInstances();
-        try {
-            Evaluation ev = evaluate().getEvaluation();
-            ev.crossValidateModel(assertClassifier(), data, numFolds, new Random(seed));
-        } catch (Exception ex) {
-            throw UncheckedException.create(ex);
-        }
-        return this;
-    }
-
-    @Override
     public Dataset evaluate() {
         try {
             evaluation = new Evaluation(instances);
@@ -267,42 +296,22 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     }
     
     @Override
-    public Dataset applyToFunctionalEvaluation(UnaryOperator<FunctionalEvaluation<Dataset>> operator) {
-        Evaluation result = operator.apply(this).getEvaluation();
-        AssertState.notNull(result, "Null evaluation");
-        evaluation = result;
-        return this;
-    }
-
-    @Override
-    public Dataset applyToEvaluation(UnaryOperator<Evaluation> operator) {
-        Evaluation result = operator.apply(assertEvaluation());
-        AssertState.notNull(result, "Null evaluation");
-        evaluation = result;
-        return this;
-    }
-
-    @Override
-    public Dataset consumeFunctionalEvaluation(Consumer<FunctionalEvaluation<Dataset>> consumer) {
-        consumer.accept(this);
-        return this;
-    }
-
-    @Override
-    public Dataset consumeEvaluation(Consumer<Evaluation> consumer) {
-        consumer.accept(assertEvaluation());
-        return this;
-    }
-
-    @Override
-    public Classifier getClassifier() {
-        return classifier;
-    }
-    
-    @Override
     public Evaluation getEvaluation() {
         return evaluation;
     }
+
+    public Dataset predictNominal(Function<Dataset, Instances> function) {
+        Instances result = function.apply(this);
+        instances = asignClassIndex(result);
+        return this;
+    }
+    
+    @Override
+    public Dataset consumeDataset(Consumer<Dataset> consumer) {
+        consumer.accept(this);
+        return this;
+    }
+    
 
     private Classifier assertClassifier() {
         AssertState.notNull(classifier, "Classifier not available");

@@ -342,7 +342,7 @@ With the default 10-fold cross-validation method it performs significantly bette
 [source]
 ----
 J48 pruned tree
-------------------
+\------------------
 
 elevation <= 32
 |   price_per_sqft <= 1072
@@ -408,7 +408,7 @@ An accuracy of 85.37% with an high level of confidence in the model, is quite go
 When you right-click on the classification result, you can see the tree model visualized. Please note, that J48 also chooses "elevation" as the initial discriminator.
 Each split is then performed such that it yields to the maximum of information gain.
 
-image::classification/j48-tree.png[J48 Tree]
+image::chap03/j48-tree.png[J48 Tree]
 
 ### Confusion Matrix
 

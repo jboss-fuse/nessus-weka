@@ -1,4 +1,4 @@
-@relation sfny-test
+@relation sfny-test20
 
 @attribute beds numeric
 @attribute bath numeric

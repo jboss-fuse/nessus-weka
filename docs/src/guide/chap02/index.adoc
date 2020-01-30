@@ -7,7 +7,7 @@ you first want to convert into Weka's native https://www.cs.waikato.ac.nz/ml/wek
 
 Here is the list of file formats that Weka supports for reading and writing ...
 
-image::data-inout/file-formats.png[File Formats,50%]
+image::chap02/file-formats.png[File Formats,50%]
 
 The data that we'll be using here, is borrowed from R2D3's excellent http://www.r2d3.us/visual-intro-to-machine-learning-part-1/[visual introduction to machine learning,window=_blank]. We have just short of 500 instances of real estate homes with various attributes assigned to them.
 
@@ -34,7 +34,7 @@ Dataset.create("data/sfny.csv").write("data/sfny.arff")
 
 Lets open the {data-part01}/sfny-numeric.arff[converted file,window=_blank] in the Weka Explorer
 
-image::data-inout/sfny-numeric.png[]
+image::chap02/sfny-numeric.png[]
 
 If this is the first time you see a dataset in Weka, I'll quickly talk you through what we can learn from this view.
 
@@ -95,11 +95,11 @@ Dataset.create("data/sfny.csv")
 
 If you haven't done already, lets now open the {data-part01}/sfny.arff[resulting dataset,window=_blank] in the Weka Explorer
 
-image::data-inout/sfny-nominal.png[]
+image::chap02/sfny-nominal.png[]
 
 If you click on the "Visualize All" button, you'll see ...
 
-image::data-inout/sfny-visualize.png[]
+image::chap02/sfny-visualize.png[]
 
 Which one of those attributes is a good candidate for initial class discrimination? Have a guess ...
 

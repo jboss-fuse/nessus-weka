@@ -7,11 +7,11 @@ When you open Weka, you'll initially see two windows.
 
 The Weka Chooser
 
-image::getting-weka/weka-chooser.png[Weka Chooser,50%]
+image::chap01/weka-chooser.png[Weka Chooser,50%]
 
 and the Weka Explorer
 
-image::getting-weka/weka-explorer.png[Weka Explorer]
+image::chap01/weka-explorer.png[Weka Explorer]
 
 Following on from here, we mostly explore how to do data mining tasks in Java APIs and in https://camel.apache.org[Apache Camel,window=_blank] workflows. 
 

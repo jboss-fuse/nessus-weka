@@ -1,4 +1,4 @@
-@relation sfny-train
+@relation sfny-train80
 
 @attribute beds numeric
 @attribute bath numeric

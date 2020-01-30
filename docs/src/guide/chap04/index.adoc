@@ -1,0 +1,136 @@
+
+## Prediction
+
+Ultimately, we would like to predict some unseen data. Quite likely also, that this data will only become available in the future.
+
+We have seen how to build a classifier using cross-validation. We found that J48 works well for the data that we have. To simulate
+unseen data, we have used a 20% (i.e. 1/5 folds) stratified split.   
+
+### Persisting a Model
+
+Lets now rebuild that model and persit it for later use with unseen data 
+
+[source,java]
+----
+ModelPersister persister = new ModelPersister("data/sfny-j48.model");
+
+Dataset.create("data/sfny-train.arff")
+
+        .buildClassifier("J48")
+        
+        .crossValidateModel(10, 1)
+        
+        .consumeClassifier(persister);
+----
+
+We can also do this in memory, with the `ModelEncoder` respectively.
+
+[source,java]
+----
+ModelEncoder encoder = new ModelEncoder();
+
+Dataset.create("data/sfny-train.arff")
+
+        .buildClassifier("J48")
+        
+        .crossValidateModel(10, 1)
+        
+        .consumeClassifier(encoder);
+        
+String encoded = encoder.getEncodedModel();
+----
+   
+### Restoring a Model
+
+Restoring the model for use with some unseen data is equally simple ...
+
+[source,java]
+----
+Dataset.create("data/sfny-test.arff")
+                
+        .loadClassifier(new ModelLoader("data/sfny-j48.model"))
+        
+        .consumeClassifier(cl -> logInfo("{}", cl))
+----
+
+or, alternatively ... 
+
+[source,java]
+----
+Dataset.create("data/sfny-test.arff")
+                
+        .loadClassifier(new ModelDecoder(encoded))
+        
+        .consumeClassifier(cl -> logInfo("{}", cl))
+----
+
+### Predicting a Class
+
+You might have noticed, that above we loaded `sfny-test` (i.e. 20% of the stratified split) that we've set aside for testing. 
+Worth noting also, that we trained the model with `sfny-train` (i.e. the 80% of the stratified split). The model has therefore 
+not yet seen `sfny-test` instances.
+
+Our test data still contains the `in_sf` attribute that holds the expected class values for SF or NY. 
+
+Lets get rid of that attribute and replace it with another that we call `predicted`. Then we pass on this dataset to the
+`NominalPredictor`, which will use the loaded classifier to fill in the prediced values. Finally, lets save the results
+in a new data file.
+
+[source,java]
+----
+Dataset.create("data/sfny-test.arff")
+                
+        .loadClassifier(new ModelDecoder(encoded))
+        
+        .apply("Remove -R last")
+        
+        .apply("Add -N predicted -T NOM -L 0,1")
+        
+        .apply("RenameRelation -modify sfny-predicted")
+        
+        .predictNominal(new NominalPredictor())
+        
+        .write("data/sfny-predicted.arff")
+----
+
+When you look at the diff between `sfny-test` and `sfny-predicted` you will find, that most instances have identical values and only a few have not.
+Infact, it is those 11 instances that Weka tells us it would not correcly classify when we train J48 with `sfny-train` and validate against the 
+supplied test set `sfny-test`.  
+
+image::chap04/sfny-diff.png[J48 Diff]
+
+[source]
+----
+=== Summary ===
+
+Correctly Classified Instances          88               88.8889 %
+Incorrectly Classified Instances        11               11.1111 %
+Kappa statistic                          0.7747
+Mean absolute error                      0.1445
+Root mean squared error                  0.3134
+Relative absolute error                 29.1259 %
+Root relative squared error             62.9411 %
+Total Number of Instances               99     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.844    0.074    0.905      0.844    0.874      0.776    0.942     0.923     0
+                 0.926    0.156    0.877      0.926    0.901      0.776    0.942     0.924     1
+Weighted Avg.    0.889    0.119    0.890      0.889    0.888      0.776    0.942     0.924     
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 38  7 |  a = 0
+  4 50 |  b = 1
+----
+
+We have now seen how to prepare new data for classification with an already existing model. 
+
+I'd say an accuracy of 88.89% is not bad at all. Congratulations J48!
+
+  
+
+
+

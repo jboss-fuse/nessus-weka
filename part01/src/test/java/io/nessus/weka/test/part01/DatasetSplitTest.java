@@ -33,9 +33,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .consumeInstances((in) -> logInfo("Training:  {}-{} ({})", firstTrainIdx, numTotal, in.numInstances()))
                 
-                .apply("RenameRelation -modify sfny-train")
+                .apply("RenameRelation -modify sfny-train80")
                 
-                .write("data/sfny-80pct.arff");
+                .write("data/sfny-train80.arff");
         
         logInfo();
         
@@ -49,9 +49,9 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .consumeInstances((in) -> logInfo("Testing:   1-{} ({})", lastTestIdx, in.numInstances()))
                 
-                .apply("RenameRelation -modify sfny-test")
+                .apply("RenameRelation -modify sfny-test20")
                 
-                .write("data/sfny-20pct.arff");
+                .write("data/sfny-test20.arff");
                 
         Assert.assertEquals(492, rndset.getInstances().numInstances());
         Assert.assertEquals(395, trainset.getInstances().numInstances());
@@ -70,7 +70,7 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .apply("RenameRelation -modify sfny-test")
                 
-                .write("data/sfny-20pct-strat.arff")
+                .write("data/sfny-test.arff")
                 
                 .pushTestSet()
                 
@@ -80,7 +80,7 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 
                 .apply("RenameRelation -modify sfny-train")
                 
-                .write("data/sfny-80pct-strat.arff")
+                .write("data/sfny-train.arff")
                 
                 .pushTrainingSet();
                                 

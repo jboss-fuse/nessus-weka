@@ -32,8 +32,8 @@ public class OneRTest extends AbstractWekaTest {
     @Test
     public void testOneRPercentageSplit() throws Exception {
         
-        Dataset training = Dataset.create("data/sfny-80pct.arff");
-        Dataset testing = Dataset.create("data/sfny-20pct.arff");
+        Dataset training = Dataset.create("data/sfny-train80.arff");
+        Dataset testing = Dataset.create("data/sfny-test20.arff");
         
         Evaluation eval = training
         
@@ -53,8 +53,8 @@ public class OneRTest extends AbstractWekaTest {
     @Test
     public void testOneRStratifiedSplit() throws Exception {
         
-        Dataset training = Dataset.create("data/sfny-80pct-strat.arff");
-        Dataset testing = Dataset.create("data/sfny-20pct-strat.arff");
+        Dataset training = Dataset.create("data/sfny-train.arff");
+        Dataset testing = Dataset.create("data/sfny-test.arff");
         
         Evaluation eval = training
         

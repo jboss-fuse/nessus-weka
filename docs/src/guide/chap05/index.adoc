@@ -1,8 +1,11 @@
 
 ## Camel-Weka
 
-Camel-Weka moves this functionality one level up and provides Weka Data Minig as part of a https://camel.apache.org/[Camel,window=_blank] workflow. There are hundreds of components available in Camel. Data can be obtained from a wide array of data sources, then be passed on to the Camel-Weka component for analysis and desicion making with the results
-yet again being passed on to other components for further processing.  
+Camel-Weka moves this functionality one level up and provides Weka Data Minig as part of a https://camel.apache.org/[Camel,window=_blank] workflow. 
+There are hundreds of components available in Camel. Data can be obtained from a wide array of data sources, then be passed on to the Camel-Weka 
+component for analysis and desicion making with the results yet again being passed on to other components for further processing.  
+
+### Consuming from file 
 
 This first example shows how to read a CSV file with the file component and then 
 pass it on to Weka. In Weka we apply a few filters to the data set and then pass it on to
@@ -35,6 +38,8 @@ camelctx.addRoutes(new RouteBuilder() {
 camelctx.start();
 ----
 
+### Read + Filter + Write
+
 The second example does the same as above without use of the file component.
 
 [source,java]
@@ -66,7 +71,21 @@ camelctx.addRoutes(new RouteBuilder() {
 camelctx.start();
 ----
    
+### Building a Model
 
+To be done ...
+
+### Persisting a Model
+
+To be done ...
+
+### Restoring a Model
+
+To be done ...
+
+### Predicting a Class
+
+To be done ...
 
 
 

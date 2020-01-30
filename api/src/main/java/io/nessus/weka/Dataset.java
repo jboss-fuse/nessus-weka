@@ -3,6 +3,7 @@ package io.nessus.weka;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import io.nessus.weka.internal.DatasetImpl;
 import io.nessus.weka.utils.DatasetUtils;
@@ -29,4 +30,6 @@ public abstract class Dataset implements FunctionalEvaluation<Dataset>, Function
     public static Dataset create(Instances instances) {
         return new DatasetImpl(instances);
     }
+
+    public abstract Dataset consumeDataset(Consumer<Dataset> consumer);
 }
