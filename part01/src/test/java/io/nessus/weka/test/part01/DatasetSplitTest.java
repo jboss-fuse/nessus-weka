@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import io.nessus.weka.Dataset;
 import io.nessus.weka.testing.AbstractWekaTest;
+import weka.core.Instances;
 
 public class DatasetSplitTest extends AbstractWekaTest {
     
@@ -69,6 +70,11 @@ public class DatasetSplitTest extends AbstractWekaTest {
                 .apply("StratifiedRemoveFolds -N 5")
                 
                 .apply("RenameRelation -modify sfny-test")
+                
+                .applyToInstances((Instances ins) -> { 
+                    ins.setRelationName("sfny-test"); 
+                    return ins;
+                 })
                 
                 .write("data/sfny-test.arff")
                 

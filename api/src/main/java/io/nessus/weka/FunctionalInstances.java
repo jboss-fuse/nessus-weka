@@ -46,6 +46,8 @@ public interface FunctionalInstances<T extends Dataset> {
 
     T consumeInstances(Consumer<Instances> consumer);
     
+    T consumeDataset(Consumer<T> consumer);
+    
     List<Attribute> getAttributes();
 
     Instances getInstances();

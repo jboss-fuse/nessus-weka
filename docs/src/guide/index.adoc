@@ -16,6 +16,9 @@ Thomas Diesler
 :java-api: {scm-path}/api/src/main/java
 :data-part01: {scm-path}/part01/data
 
+:weka-api: https://weka.sourceforge.io/doc.stable-3-8
+
+
 (C) 2020 The original authors.
 
 Welcome to Nessus Weka. This is a collection of examples and tutorials related to the https://www.cs.waikato.ac.nz/ml/weka[Weka,window=_blank] data mining toolset.
@@ -35,6 +38,8 @@ include::chap03/index.adoc[]
 include::chap04/index.adoc[]
 
 include::chap05/index.adoc[]
+
+include::chap06/index.adoc[]
 
 ## Feedback
 

@@ -322,7 +322,7 @@ How about, building a model that works on multiple attributes ...
 
 ### Decision Tree
 
-Lets meet https://en.wikipedia.org/wiki/C4.5_algorithm[J48,window=_blank], "a landmark decision tree program that is probably the machine learning workhorse most widely used in practice to date" ()
+Lets meet https://en.wikipedia.org/wiki/C4.5_algorithm[J48,window=_blank], __"a landmark decision tree program that is probably the machine learning workhorse most widely used in practice to date"__ (https://www.cs.waikato.ac.nz/~ihw/[Ian H. Witten,window=_blank], et al.)
 
 [source,java]
 ----
@@ -342,7 +342,6 @@ With the default 10-fold cross-validation method it performs significantly bette
 [source]
 ----
 J48 pruned tree
-\------------------
 
 elevation <= 32
 |   price_per_sqft <= 1072

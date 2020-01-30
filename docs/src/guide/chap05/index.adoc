@@ -1,91 +1,109 @@
 
-## Camel-Weka
+## Extending the API
 
-Camel-Weka moves this functionality one level up and provides Weka Data Minig as part of a https://camel.apache.org/[Camel,window=_blank] workflow. 
-There are hundreds of components available in Camel. Data can be obtained from a wide array of data sources, then be passed on to the Camel-Weka 
-component for analysis and desicion making with the results yet again being passed on to other components for further processing.  
+The Nessus-Weka API is here to compliment rather than duplicate or reinvent functionality that is already present in Weka APIs.
 
-### Consuming from file 
+The {java-api}/io/nessus/weka/Dataset.java[Dataset], which is the main entry point for everything, is a contextual
+mutable, non-thread-safe entity. It is the holder of {weka-api}/weka/core/Instances.html[Instances], 
+{weka-api}/weka/classifiers/Classifier.html[Classifier], {weka-api}/weka/classifiers/Evaluation.html[Evaluation].
 
-This first example shows how to read a CSV file with the file component and then 
-pass it on to Weka. In Weka we apply a few filters to the data set and then pass it on to
-the file component for writing. 
+Dataset holds multiple `Instances` one of which is the current, the others can be associated with a name and stashed for later use. Pushing the 
+current `Instances` will put them on the stack. Popping `Instances` will remove them from the stack and make them current.
 
-[source,java]
-----
-CamelContext camelctx = new DefaultCamelContext();
-camelctx.addRoutes(new RouteBuilder() {
+A `Classifier` will exist once loaded or built. An `Evaluation` will exist once the `Classifier` has been evaluated. 
 
-    @Override
-    public void configure() throws Exception {
-        
-        // Use the file component to read the CSV file
-        from("file:src/test/resources/data?fileName=sfny.csv&noop=true")
-        
-        // Convert the 'in_sf' attribute to nominal
-        .to("weka:filter?apply=NumericToNominal -R first")
-        
-        // Move the 'in_sf' attribute to the end
-        .to("weka:filter?apply=Reorder -R 2-last,1")
-        
-        // Rename the relation
-        .to("weka:filter?apply=RenameRelation -modify sfny")
-        
-        // Use the file component to write the Arff file
-        .to("file:target/data?fileName=sfny.arff")
-    }
-});
-camelctx.start();
-----
-
-### Read + Filter + Write
-
-The second example does the same as above without use of the file component.
+Appart from getting `Instances`, `Classifier` or `Evaluation`, you'll find methods of this type ...
 
 [source,java]
 ----
-CamelContext camelctx = new DefaultCamelContext();
-camelctx.addRoutes(new RouteBuilder() {
+// Do something with Foo and return a Foo
+Dataset applyToFoo(UnaryOperator<Foo> operator);
 
-    @Override
-    public void configure() throws Exception {
-        
-        from("direct:start")
-        
-        // Use Weka to read the CSV file
-        .to("weka:read?path=src/test/resources/data/sfny.csv")
-        
-        // Convert the 'in_sf' attribute to nominal
-        .to("weka:filter?apply=NumericToNominal -R first")
-        
-        // Move the 'in_sf' attribute to the end
-        .to("weka:filter?apply=Reorder -R 2-last,1")
-        
-        // Rename the relation
-        .to("weka:filter?apply=RenameRelation -modify sfny")
-        
-        // Use Weka to write the Arff file
-        .to("weka:write?path=target/data/sfny.arff");
-    }
-});
-camelctx.start();
+// Do something with with the Datasset and return a Foo
+Dataset applyToFoo(Function<Dataset, Foo> function);
+
+// Do something with Foo and return nothing
+Dataset consumeFoo(Consumer<Foo> consumer);
 ----
-   
-### Building a Model
 
-To be done ...
+These are very general extension points to the API, which allow you to get at the Weka primitives, do something with them (using the Weka APIs)
+and then return the primitive back to the Dataset such that the next step can see the modified result from the previous step.
 
-### Persisting a Model
+So for example, if you like to log the state of the current Classifier, you could do ...  
 
-To be done ...
+[source,java]
+----
+Evaluation eval = Dataset.create("data/sfny.arff")
 
-### Restoring a Model
+        .buildClassifier("J48")
+        
+        .consumeClassifier(cl -> logInfo("{}", cl))
+----
 
-To be done ...
+The {java-api}/io/nessus/weka/ModelPersister.java[ModelPersister] is another example of a `Consumer<Classifier>`. 
+This time, defined externally rather than inline.
 
-### Predicting a Class
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny-train.arff")
 
-To be done ...
+        .buildClassifier("J48")
+        
+        .crossValidateModel(10, 1)
+        
+        .consumeClassifier(new ModelPersister("data/sfny-j48.model"))
+----
+                
+The {java-api}/io/nessus/weka/NominalPredictor.java[NominalPredictor] is a good example of a `Function<Dataset, Instances>`. 
+It accepts the `Dataset` so that it can get access to the `Classifier` and the `Instances` then does some number crunching 
+and return new `Instances` that can then be passed on to the next step.
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny-test.arff")
+        
+        .applyToInstances(new NominalPredictor())
+----
+
+You get the idea, it is all about passing in functionality that is defined elsewhere. The `Dataset` has only very few "convenients" methods
+that are so common that we prefer to use a simplified syntax rather than the functional approach.
+
+These would be for example ...
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny-test.arff")
+        
+        .apply("StratifiedRemoveFolds -N 5")
+        
+        .buildClassifier("J48")
+----
+ 
+Under the hood, these invoke functions that return `Instances` and a `Classifier` respectively.
+
+One last example perhaps. Instead of invoking the rename filter like this ...
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny-test.arff")
+        
+    .apply("RenameRelation -modify sfny-test")
+----
+
+you could equally well do this in Java like this ...
+
+
+[source,java]
+----
+Dataset dataset = Dataset.create("data/sfny-test.arff")
+        
+        .applyToInstances((Instances ins) -> { 
+            ins.setRelationName("sfny-test"); 
+            return ins;
+         })
+----
 
 
 
+                
+                

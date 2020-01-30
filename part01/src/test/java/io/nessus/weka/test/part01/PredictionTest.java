@@ -35,7 +35,7 @@ public class PredictionTest extends AbstractWekaTest {
                 
                 .apply("RenameRelation -modify sfny-predicted")
                 
-                .predictNominal(new NominalPredictor())
+                .applyToInstances(new NominalPredictor())
                 
                 .write("data/sfny-predicted.arff");
         
