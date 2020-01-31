@@ -40,7 +40,7 @@ camelctx.start();
 
 ### Read + Filter + Write
 
-The second example does the same as above without use of the file component.
+Here we do the same as above without use of the file component.
 
 [source,java]
 ----
@@ -50,8 +50,11 @@ camelctx.addRoutes(new RouteBuilder() {
     @Override
     public void configure() throws Exception {
         
-        // Use Weka to read the CSV file
-        .from("weka:read?path=src/test/resources/data/sfny.csv")
+        // Initiate the route from somewhere
+        .from("...")
+        
+        // Use weka to read the CSV file
+        .to("weka:read?path=src/test/resources/data/sfny.csv")
         
         // Convert the 'in_sf' attribute to nominal
         .to("weka:filter?apply=NumericToNominal -R first")
@@ -69,6 +72,36 @@ camelctx.addRoutes(new RouteBuilder() {
 camelctx.start();
 ----
    
+In this example, would the client provide the input path or some other supported type.
+Have a look at the  `WekaTypeConverters` for the set of supported input types.
+
+[source,java]
+----
+CamelContext camelctx = new DefaultCamelContext();
+camelctx.addRoutes(new RouteBuilder() {
+
+    @Override
+    public void configure() throws Exception {
+        
+        // Initiate the route from somewhere
+        .from("...")
+        
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?apply=NumericToNominal -R first")
+        
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?apply=Reorder -R 2-last,1")
+        
+        // Rename the relation
+        .to("weka:filter?apply=RenameRelation -modify sfny")
+        
+        // Use Weka to write the Arff file
+        .to("weka:write?path=target/data/sfny.arff");
+    }
+});
+camelctx.start();
+----
+
 ### Building a Model
 
 When building a model, we first choose the classification algorithm to use and then train it with some data. The result is the trained model that we can later use to classify unseen data.
@@ -77,99 +110,90 @@ Here we train J48 with 10 fold cross-validation ...
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-            
-            // Build a J48 classifier using cross-validation with 10 folds
-            .to("weka:model?build=J48&xval=true&folds=10&seed=1")
-        }
-    });
-    camelctx.start();
-}
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
+        
+        // Build a J48 classifier using cross-validation with 10 folds
+        .to("weka:model?build=J48&xval=true&folds=10&seed=1")
+    }
+});
+camelctx.start();
 ----
 
 Instead of doing cross-validation, we can also train the model with a set of named instances ...
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-            
-            // Push the current instances to the stack
-            .to("weka:push?dsname=sfny-train")
-            
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48&dsname=sfny-train")
-        }
-    });
-    camelctx.start();
-}
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
+        
+        // Push the current instances to the stack
+        .to("weka:push?dsname=sfny-train")
+        
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48&dsname=sfny-train")
+    }
+});
+camelctx.start();
 ----
 
 Or perhaps even with the current set of instances ... 
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-            
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48")
-        }
-    });
-    camelctx.start();
-}
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
+        
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48")
+    }
+});
+camelctx.start();
 ----
 
 ### Persisting a Model
 
-When we build a model, it becomes available in the `Dataset` context. Building a good model with lots of training data may 
-become a lengthy process that we don't wish to do that over again every time we have some data to analyse. 
+When we build a model, it becomes available in the `Dataset` context. Building a good model with lots of training data may become a lengthy process that we don't wish to do that over again every time we have some data to analyse. 
 
 Persisting a trained `Classifier` is easy ...
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-            
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48")
-                    
-            // Persist the J48 model
-            .to("weka:model?saveTo=src/test/resources/data/sfny-j48.model")
-        }
-    });
-    camelctx.start();
-}
+        // Initiate the route from somewhere
+        .from("...")
+        
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48")
+                
+        // Persist the J48 model
+        .to("weka:model?saveTo=src/test/resources/data/sfny-j48.model")
+    }
+});
+camelctx.start();
 ----
 
 ### Restoring a Model
@@ -178,22 +202,20 @@ Instead of building a model, we can also load an existing model that we have bui
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the data file
-            from("weka:read?path=src/test/resources/data/sfny-test.arff")
-            
-            // Load an already existing model
-            .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
-        }
-    });
-    camelctx.start();
-}
+        // Initiate the route from somewhere
+        .from("...")
+        
+        // Load an already existing model
+        .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
+    }
+});
+camelctx.start();
 ----
 
 
@@ -208,42 +230,40 @@ section about link:#_nessus_api_concepts[Nessus API Concepts].
 
 [source,java]
 ----
-try (CamelContext camelctx = new DefaultCamelContext()) {
+CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
     
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
         
-        @Override
-        public void configure() throws Exception {
-            
-            // Use weka to read the data file
-            from("weka:read?path=src/test/resources/data/sfny-test.arff")
-            
-            // Remove the class attribute 
-            .to("weka:filter?apply=Remove -R last")
-            
-            // Add the 'prediction' placeholder attribute 
-            .to("weka:filter?apply=Add -N predicted -T NOM -L 0,1")
-            
-            // Rename the relation 
-            .to("weka:filter?apply=RenameRelation -modify sfny-predicted")
-            
-            // Load an already existing model
-            .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
-            
-            // Use a processor to do the prediction
-            .process(new Processor() {
-                public void process(Exchange exchange) throws Exception {
-                    Dataset dataset = exchange.getMessage().getBody(Dataset.class);
-                    dataset.applyToInstances(new NominalPredictor());
-                }
-            })
-                    
-            // Write the data file
-            .to("weka:write?path=src/test/resources/data/sfny-predicted.arff")
-        }
-    });
-    camelctx.start();
-}
+        // Use the file component to read the test data
+        from("file:src/test/resources/data?fileName=sfny-test.arff")
+        
+        // Remove the class attribute 
+        .to("weka:filter?apply=Remove -R last")
+        
+        // Add the 'prediction' placeholder attribute 
+        .to("weka:filter?apply=Add -N predicted -T NOM -L 0,1")
+        
+        // Rename the relation 
+        .to("weka:filter?apply=RenameRelation -modify sfny-predicted")
+        
+        // Load an already existing model
+        .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
+        
+        // Use a processor to do the prediction
+        .process(new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                Dataset dataset = exchange.getMessage().getBody(Dataset.class);
+                dataset.applyToInstances(new NominalPredictor());
+            }
+        })
+                
+        // Write the data file
+        .to("weka:write?path=src/test/resources/data/sfny-predicted.arff")
+    }
+});
+camelctx.start();
 ----
 
 

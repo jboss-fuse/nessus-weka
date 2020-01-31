@@ -68,7 +68,7 @@ Dataset dataset = Dataset.create("data/sfny-test.arff")
 You get the idea, it is all about passing in functionality that is defined elsewhere. The `Dataset` has only very few "convenients" methods
 that are so common that we prefer to use a simplified syntax rather than the functional approach.
 
-These would be for example ...
+These would for example be ...
 
 [source,java]
 ----
@@ -90,7 +90,7 @@ Dataset dataset = Dataset.create("data/sfny-test.arff")
     .apply("RenameRelation -modify sfny-test")
 ----
 
-you could equally well do this in Java like this ...
+we could equally well have done this in Java like this ...
 
 
 [source,java]

@@ -15,9 +15,7 @@ It simply counts the number of instances per class and always predicts the class
 
 [source,java]
 ----
-Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("ZeroR")
     
@@ -59,9 +57,7 @@ Whereas ZeroR did not look at any of the attributes, OneR finds the one attribut
 
 [source,java]
 ----
-Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("OneR")
     
@@ -108,7 +104,7 @@ Lets fix that ...
 ### Splitting the Data
 
 Assuming that we don't have another source of data, we need to split up the data that we do have. 
-A good rule of thumb is perhaps to use 80% for training the model and 20% for evaluating its performance.  
+A good rule of thumb is to use 80% for training the model and 20% for evaluating its performance.  
 
 When you look at {data-part01}/sfny.arff[sfny.arff,window=_blank] you will notice that all instances for NY come first, followed by the instances for SF.
 Simply using the first 80% of instances for training would not work so well. We therefore randomly reorder the data instances before we do the split.
@@ -270,16 +266,16 @@ You might think OneR is quite boring and there is only so much improvement you c
 Well yes, you might be right about this, but we are not quite there yet ...
 
 The stratified split above divides the data into five "folds" it reserves one fold (i.e. 20%) for testing and uses the other four folds for training the model.
-We could also have used 10 folds and we could have done the whole process over and over again using a different random seeds every time. At the end, we could 
-have averaged the results that we thus obtained and only then go to the pub with high confidence in our model.
+We could also have used 10 folds and we could have used a different fold (i.e. not just the first one) as our test set. 
+We could also have done the whole process over and over again using a different random seeds every time. 
+At the end, we could have aggregated the results and produce a model that works best for all of those iterations.
+Only then we would go to the pub with high confidence in our model.
 
 Lets finally do that and see what it gives us ...
 
 [source,java]
 ----
-Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("OneR")
     
@@ -326,9 +322,7 @@ Lets meet https://en.wikipedia.org/wiki/C4.5_algorithm[J48,window=_blank], __"a 
 
 [source,java]
 ----
-Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("J48")
     
@@ -337,7 +331,8 @@ Evaluation eval = dataset
     .getEvaluation();
 ----
 
-With the default 10-fold cross-validation method it performs significantly better than OneR. 
+With the default 10-fold cross-validation method it produces a model significantly more complex than that from OneR.
+It also performs significantly better than OneR. 
 
 [source]
 ----

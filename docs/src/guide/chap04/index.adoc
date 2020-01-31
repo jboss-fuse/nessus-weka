@@ -72,7 +72,7 @@ not yet seen `sfny-test` instances.
 
 Our test data still contains the `in_sf` attribute that holds the expected class values for SF or NY. 
 
-Lets get rid of that attribute and replace it with another that we call `predicted`. Then we pass on this dataset to the
+Lets get rid of that attribute and replace it with another attribute that we call `predicted`. Then we pass on this dataset to the
 `NominalPredictor`, which will use the loaded classifier to fill in the prediced values. Finally, lets save the results
 in a new data file.
 
@@ -88,7 +88,7 @@ Dataset.create("data/sfny-test.arff")
         
         .apply("RenameRelation -modify sfny-predicted")
         
-        .predictNominal(new NominalPredictor())
+        .applyToInstances(new NominalPredictor())
         
         .write("data/sfny-predicted.arff")
 ----

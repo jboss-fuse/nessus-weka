@@ -23,9 +23,9 @@ Thomas Diesler
 
 Welcome to Nessus Weka. This is a collection of examples and tutorials related to the https://www.cs.waikato.ac.nz/ml/weka[Weka,window=_blank] data mining toolset.
 
-Weka is tried and tested open source machine learning software that can be accessed through a graphical user interface, standard terminal applications, 
+_Weka is tried and tested open source machine learning software that can be accessed through a graphical user interface, standard terminal applications, 
 or a Java API. It is widely used for teaching, research, and industrial applications, contains a plethora of built-in tools for standard machine learning tasks, 
-and additionally gives transparent access to well-known toolboxes such as scikit-learn, R, and Deeplearning4j. 
+and additionally gives transparent access to well-known toolboxes such as scikit-learn, R, and Deeplearning4j._ 
 
 In this intro, we'll show you how to get started with simple data mining tasks and how to incorporate these into larger https://camel.apache.org[Apache Camel,window=_blank] workflows.
 
