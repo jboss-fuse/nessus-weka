@@ -13,7 +13,6 @@
     <name>Nessus :: Weka :: Camel</name>
 
     <dependencies>
-        
         <dependency>
 	        <groupId>io.nessus.weka</groupId>
 	        <artifactId>nessus-weka-api</artifactId>
@@ -21,12 +20,14 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
-            <artifactId>camel-weka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
+        <!-- 
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-weka</artifactId>
+        </dependency>
+        -->
         
         <!-- Test -->
         <dependency>
@@ -39,7 +40,18 @@
             <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
-        
     </dependencies>
     
+    <build>
+        <plugins>
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-surefire-plugin</artifactId>
+	            <version>${version-maven-surefire-plugin}</version>
+	            <configuration>
+	                <skipTests>true</skipTests>
+	            </configuration>
+	        </plugin>
+        </plugins>
+    </build>
 </project>
