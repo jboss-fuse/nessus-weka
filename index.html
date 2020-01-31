@@ -437,8 +437,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>Nessus Weka</h1>
 <div class="details">
 <span id="author" class="author">Thomas Diesler</span><br>
-<span id="revnumber">version 1.0.1,</span>
-<span id="revdate">2020-01-31</span>
+<span id="revnumber">version 1.0.2-SNAPSHOT,</span>
+<span id="revdate">2020-02-03</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -493,9 +493,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Welcome to Nessus Weka. This is a collection of examples and tutorials related to the <a href="https://www.cs.waikato.ac.nz/ml/weka" target="_blank" rel="noopener">Weka</a> data mining toolset.</p>
 </div>
 <div class="paragraph">
-<p>Weka is tried and tested open source machine learning software that can be accessed through a graphical user interface, standard terminal applications,
+<p><em>Weka is tried and tested open source machine learning software that can be accessed through a graphical user interface, standard terminal applications,
 or a Java API. It is widely used for teaching, research, and industrial applications, contains a plethora of built-in tools for standard machine learning tasks,
-and additionally gives transparent access to well-known toolboxes such as scikit-learn, R, and Deeplearning4j.</p>
+and additionally gives transparent access to well-known toolboxes such as scikit-learn, R, and Deeplearning4j.</em></p>
 </div>
 <div class="paragraph">
 <p>In this intro, we&#8217;ll show you how to get started with simple data mining tasks and how to incorporate these into larger <a href="https://camel.apache.org" target="_blank" rel="noopener">Apache Camel</a> workflows.</p>
@@ -712,9 +712,7 @@ It simply counts the number of instances per class and always predicts the class
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("ZeroR")
 
@@ -762,9 +760,7 @@ Whereas ZeroR did not look at any of the attributes, OneR finds the one attribut
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("OneR")
 
@@ -819,7 +815,7 @@ The model already knew every data instance and could therefore find the ideal bo
 <h3 id="_splitting_the_data">3.3. Splitting the Data</h3>
 <div class="paragraph">
 <p>Assuming that we don&#8217;t have another source of data, we need to split up the data that we do have.
-A good rule of thumb is perhaps to use 80% for training the model and 20% for evaluating its performance.</p>
+A good rule of thumb is to use 80% for training the model and 20% for evaluating its performance.</p>
 </div>
 <div class="paragraph">
 <p>When you look at <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">sfny.arff</a> you will notice that all instances for NY come first, followed by the instances for SF.
@@ -998,17 +994,17 @@ Well yes, you might be right about this, but we are not quite there yet &#8230;&
 </div>
 <div class="paragraph">
 <p>The stratified split above divides the data into five "folds" it reserves one fold (i.e. 20%) for testing and uses the other four folds for training the model.
-We could also have used 10 folds and we could have done the whole process over and over again using a different random seeds every time. At the end, we could
-have averaged the results that we thus obtained and only then go to the pub with high confidence in our model.</p>
+We could also have used 10 folds and we could have used a different fold (i.e. not just the first one) as our test set.
+We could also have done the whole process over and over again using a different random seeds every time.
+At the end, we could have aggregated the results and produce a model that works best for all of those iterations.
+Only then we would go to the pub with high confidence in our model.</p>
 </div>
 <div class="paragraph">
 <p>Lets finally do that and see what it gives us &#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("OneR")
 
@@ -1061,9 +1057,7 @@ I guess, we&#8217;ve just been lucky in the way we split the data. Anyhow, I&#82
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Dataset dataset = Dataset.create("data/sfny.arff");
-
-Evaluation eval = dataset
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Evaluation eval = Dataset.create("data/sfny.arff")
 
     .buildClassifier("J48")
 
@@ -1073,7 +1067,8 @@ Evaluation eval = dataset
 </div>
 </div>
 <div class="paragraph">
-<p>With the default 10-fold cross-validation method it performs significantly better than OneR.</p>
+<p>With the default 10-fold cross-validation method it produces a model significantly more complex than that from OneR.
+It also performs significantly better than OneR.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1238,7 +1233,7 @@ not yet seen <code>sfny-test</code> instances.</p>
 <p>Our test data still contains the <code>in_sf</code> attribute that holds the expected class values for SF or NY.</p>
 </div>
 <div class="paragraph">
-<p>Lets get rid of that attribute and replace it with another that we call <code>predicted</code>. Then we pass on this dataset to the
+<p>Lets get rid of that attribute and replace it with another attribute that we call <code>predicted</code>. Then we pass on this dataset to the
 <code>NominalPredictor</code>, which will use the loaded classifier to fill in the prediced values. Finally, lets save the results
 in a new data file.</p>
 </div>
@@ -1254,7 +1249,7 @@ in a new data file.</p>
 
         .apply("RenameRelation -modify sfny-predicted")
 
-        .predictNominal(new NominalPredictor())
+        .applyToInstances(new NominalPredictor())
 
         .write("data/sfny-predicted.arff")</code></pre>
 </div>
@@ -1386,7 +1381,7 @@ and return new <code>Instances</code> that can then be passed on to the next ste
 that are so common that we prefer to use a simplified syntax rather than the functional approach.</p>
 </div>
 <div class="paragraph">
-<p>These would be for example &#8230;&#8203;</p>
+<p>These would for example be &#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1411,7 +1406,7 @@ that are so common that we prefer to use a simplified syntax rather than the fun
 </div>
 </div>
 <div class="paragraph">
-<p>you could equally well do this in Java like this &#8230;&#8203;</p>
+<p>we could equally well have done this in Java like this &#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1471,7 +1466,7 @@ camelctx.start();</code></pre>
 <div class="sect2">
 <h3 id="_read_filter_write">6.2. Read + Filter + Write</h3>
 <div class="paragraph">
-<p>The second example does the same as above without use of the file component.</p>
+<p>Here we do the same as above without use of the file component.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1481,8 +1476,42 @@ camelctx.addRoutes(new RouteBuilder() {
     @Override
     public void configure() throws Exception {
 
-        // Use Weka to read the CSV file
-        .from("weka:read?path=src/test/resources/data/sfny.csv")
+        // Initiate the route from somewhere
+        .from("...")
+
+        // Use weka to read the CSV file
+        .to("weka:read?path=src/test/resources/data/sfny.csv")
+
+        // Convert the 'in_sf' attribute to nominal
+        .to("weka:filter?apply=NumericToNominal -R first")
+
+        // Move the 'in_sf' attribute to the end
+        .to("weka:filter?apply=Reorder -R 2-last,1")
+
+        // Rename the relation
+        .to("weka:filter?apply=RenameRelation -modify sfny")
+
+        // Use Weka to write the Arff file
+        .to("weka:write?path=target/data/sfny.arff");
+    }
+});
+camelctx.start();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, would the client provide the input path or some other supported type.
+Have a look at the  <code>WekaTypeConverters</code> for the set of supported input types.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext();
+camelctx.addRoutes(new RouteBuilder() {
+
+    @Override
+    public void configure() throws Exception {
+
+        // Initiate the route from somewhere
+        .from("...")
 
         // Convert the 'in_sf' attribute to nominal
         .to("weka:filter?apply=NumericToNominal -R first")
@@ -1511,22 +1540,20 @@ camelctx.start();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
 
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-
-            // Build a J48 classifier using cross-validation with 10 folds
-            .to("weka:model?build=J48&amp;xval=true&amp;folds=10&amp;seed=1")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Build a J48 classifier using cross-validation with 10 folds
+        .to("weka:model?build=J48&amp;xval=true&amp;folds=10&amp;seed=1")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1534,25 +1561,23 @@ camelctx.start();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
 
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
+        // Push the current instances to the stack
+        .to("weka:push?dsname=sfny-train")
 
-            // Push the current instances to the stack
-            .to("weka:push?dsname=sfny-train")
-
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48&amp;dsname=sfny-train")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48&amp;dsname=sfny-train")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1560,55 +1585,50 @@ camelctx.start();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Use the file component to read the training data
+        from("file:src/test/resources/data?fileName=sfny-train.arff")
 
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
-
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_persisting_a_model_2">6.4. Persisting a Model</h3>
 <div class="paragraph">
-<p>When we build a model, it becomes available in the <code>Dataset</code> context. Building a good model with lots of training data may
-become a lengthy process that we don&#8217;t wish to do that over again every time we have some data to analyse.</p>
+<p>When we build a model, it becomes available in the <code>Dataset</code> context. Building a good model with lots of training data may become a lengthy process that we don&#8217;t wish to do that over again every time we have some data to analyse.</p>
 </div>
 <div class="paragraph">
 <p>Persisting a trained <code>Classifier</code> is easy &#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Initiate the route from somewhere
+        .from("...")
 
-            // Use weka to read the model training data
-            from("weka:read?path=src/test/resources/data/sfny-train.arff")
+        // Build a J48 classifier with a set of named instances
+        .to("weka:model?build=J48")
 
-            // Build a J48 classifier with a set of named instances
-            .to("weka:model?build=J48")
-
-            // Persist the J48 model
-            .to("weka:model?saveTo=src/test/resources/data/sfny-j48.model")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Persist the J48 model
+        .to("weka:model?saveTo=src/test/resources/data/sfny-j48.model")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 </div>
@@ -1619,22 +1639,20 @@ become a lengthy process that we don&#8217;t wish to do that over again every ti
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Initiate the route from somewhere
+        .from("...")
 
-            // Use weka to read the data file
-            from("weka:read?path=src/test/resources/data/sfny-test.arff")
-
-            // Load an already existing model
-            .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Load an already existing model
+        .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 </div>
@@ -1652,42 +1670,40 @@ section about <a href="#_nessus_api_concepts">Nessus API Concepts</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">try (CamelContext camelctx = new DefaultCamelContext()) {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">CamelContext camelctx = new DefaultCamelContext());
+camelctx.addRoutes(new RouteBuilder() {
 
-    camelctx.addRoutes(new RouteBuilder() {
+    @Override
+    public void configure() throws Exception {
 
-        @Override
-        public void configure() throws Exception {
+        // Use the file component to read the test data
+        from("file:src/test/resources/data?fileName=sfny-test.arff")
 
-            // Use weka to read the data file
-            from("weka:read?path=src/test/resources/data/sfny-test.arff")
+        // Remove the class attribute
+        .to("weka:filter?apply=Remove -R last")
 
-            // Remove the class attribute
-            .to("weka:filter?apply=Remove -R last")
+        // Add the 'prediction' placeholder attribute
+        .to("weka:filter?apply=Add -N predicted -T NOM -L 0,1")
 
-            // Add the 'prediction' placeholder attribute
-            .to("weka:filter?apply=Add -N predicted -T NOM -L 0,1")
+        // Rename the relation
+        .to("weka:filter?apply=RenameRelation -modify sfny-predicted")
 
-            // Rename the relation
-            .to("weka:filter?apply=RenameRelation -modify sfny-predicted")
+        // Load an already existing model
+        .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
 
-            // Load an already existing model
-            .to("weka:model?loadFrom=src/test/resources/data/sfny-j48.model")
+        // Use a processor to do the prediction
+        .process(new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                Dataset dataset = exchange.getMessage().getBody(Dataset.class);
+                dataset.applyToInstances(new NominalPredictor());
+            }
+        })
 
-            // Use a processor to do the prediction
-            .process(new Processor() {
-                public void process(Exchange exchange) throws Exception {
-                    Dataset dataset = exchange.getMessage().getBody(Dataset.class);
-                    dataset.applyToInstances(new NominalPredictor());
-                }
-            })
-
-            // Write the data file
-            .to("weka:write?path=src/test/resources/data/sfny-predicted.arff")
-        }
-    });
-    camelctx.start();
-}</code></pre>
+        // Write the data file
+        .to("weka:write?path=src/test/resources/data/sfny-predicted.arff")
+    }
+});
+camelctx.start();</code></pre>
 </div>
 </div>
 </div>
@@ -1738,8 +1754,8 @@ section about <a href="#_nessus_api_concepts">Nessus API Concepts</a>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.0.1<br>
-Last updated 2020-01-30 15:20:02 CET
+Version 1.0.2-SNAPSHOT<br>
+Last updated 2020-01-31 18:11:24 CET
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
