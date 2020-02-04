@@ -10,12 +10,12 @@
     <packaging>pom</packaging>
     
     <description>Nessus Weka </description>
-    <url>https://github.com/tdiesler/nessus-weka</url>
+    <url>https://github.com/jboss-fuse/nessus-weka</url>
 
     <scm>
-        <connection>scm:git:https://github.com/tdiesler/nessus-weka</connection>
-        <developerConnection>scm:git:git@github.com:tdiesler/nessus-weka</developerConnection>
-        <url>https://github.com/tdiesler/nessus-weka</url>
+        <connection>scm:git:https://github.com/jboss-fuse/nessus-weka</connection>
+        <developerConnection>scm:git:git@github.com:jboss-fuse/nessus-weka</developerConnection>
+        <url>https://github.com/jboss-fuse/nessus-weka</url>
         <tag>HEAD</tag>
     </scm>
     

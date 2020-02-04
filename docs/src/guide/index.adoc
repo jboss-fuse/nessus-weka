@@ -9,7 +9,7 @@ Thomas Diesler
 :linkattrs:
 :sectnums:
 
-:scm-root: https://github.com/tdiesler/nessus-weka
+:scm-root: https://github.com/jboss-fuse/nessus-weka
 :scm-branch: /tree/master
 :scm-path: {scm-root}{scm-branch}
 

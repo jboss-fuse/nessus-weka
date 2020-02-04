@@ -11,7 +11,7 @@ to well-known toolboxes such as scikit-learn, R, and Deeplearning4j.
 
 The docs are generated using [Asciidoctor](http://asciidoctor.org/docs).
 
-* [Documentation](https://tdiesler.github.io/nessus-weka)
+* [Documentation](https://jboss-fuse.github.io/nessus-weka)
 
 ### Building this project
 

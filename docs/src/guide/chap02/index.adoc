@@ -2,7 +2,7 @@
 ## Data Input/Output
 
 When you get started, it is quite likely that your data isn't available (yet) in a format that data mining libraries can use effectively. 
-Lets asume, you have some https://raw.githubusercontent.com/tdiesler/nessus-weka/master/part01/data/sfny.csv[csv data,window=_blank] that
+Lets asume, you have some https://raw.githubusercontent.com/jboss-fuse/nessus-weka/master/part01/data/sfny.csv[csv data,window=_blank] that
 you first want to convert into Weka's native https://www.cs.waikato.ac.nz/ml/weka/arff.html[.arff,window=_blank] format.
 
 Here is the list of file formats that Weka supports for reading and writing ...

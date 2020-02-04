@@ -6,10 +6,6 @@ import java.nio.file.Paths;
 
 import io.nessus.weka.LogSupport;
 
-/**
- * @author tdiesler@redhat.com
- * @since 2019-09-05
- */
 public class AbstractWekaTest extends LogSupport {
 	
     protected Path getOutPath() {
