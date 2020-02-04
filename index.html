@@ -438,7 +438,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Thomas Diesler</span><br>
 <span id="revnumber">version 1.0.2-SNAPSHOT,</span>
-<span id="revdate">2020-02-03</span>
+<span id="revdate">2020-02-04</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -548,7 +548,7 @@ In Nessus, we aim to provide entry points that are general enough to access the 
 <div class="sectionbody">
 <div class="paragraph">
 <p>When you get started, it is quite likely that your data isn&#8217;t available (yet) in a format that data mining libraries can use effectively.
-Lets asume, you have some <a href="https://raw.githubusercontent.com/tdiesler/nessus-weka/master/part01/data/sfny.csv" target="_blank" rel="noopener">csv data</a> that
+Lets asume, you have some <a href="https://raw.githubusercontent.com/jboss-fuse/nessus-weka/master/part01/data/sfny.csv" target="_blank" rel="noopener">csv data</a> that
 you first want to convert into Weka&#8217;s native <a href="https://www.cs.waikato.ac.nz/ml/weka/arff.html" target="_blank" rel="noopener">.arff</a> format.</p>
 </div>
 <div class="paragraph">
@@ -579,7 +579,7 @@ you first want to convert into Weka&#8217;s native <a href="https://www.cs.waika
 </div>
 </div>
 <div class="paragraph">
-<p>In fact, because <a href="https://github.com/tdiesler/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/Dataset.java" target="_blank" rel="noopener">Dataset</a> has a functional flow API, we could have done</p>
+<p>In fact, because <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/Dataset.java" target="_blank" rel="noopener">Dataset</a> has a functional flow API, we could have done</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -587,7 +587,7 @@ you first want to convert into Weka&#8217;s native <a href="https://www.cs.waika
 </div>
 </div>
 <div class="paragraph">
-<p>Lets open the <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny-numeric.arff" target="_blank" rel="noopener">converted file</a> in the Weka Explorer</p>
+<p>Lets open the <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/part01/data/sfny-numeric.arff" target="_blank" rel="noopener">converted file</a> in the Weka Explorer</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -670,7 +670,7 @@ Instead, we moved it to the last position where Weka expects to see the class at
 </div>
 </div>
 <div class="paragraph">
-<p>If you haven&#8217;t done already, lets now open the <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">resulting dataset</a> in the Weka Explorer</p>
+<p>If you haven&#8217;t done already, lets now open the <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">resulting dataset</a> in the Weka Explorer</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -818,7 +818,7 @@ The model already knew every data instance and could therefore find the ideal bo
 A good rule of thumb is to use 80% for training the model and 20% for evaluating its performance.</p>
 </div>
 <div class="paragraph">
-<p>When you look at <a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">sfny.arff</a> you will notice that all instances for NY come first, followed by the instances for SF.
+<p>When you look at <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/part01/data/sfny.arff" target="_blank" rel="noopener">sfny.arff</a> you will notice that all instances for NY come first, followed by the instances for SF.
 Simply using the first 80% of instances for training would not work so well. We therefore randomly reorder the data instances before we do the split.</p>
 </div>
 <div class="paragraph">
@@ -1307,7 +1307,7 @@ Weighted Avg.    0.889    0.119    0.890      0.889    0.888      0.776    0.942
 <p>The Nessus-Weka API is here to compliment rather than duplicate or reinvent functionality that is already present in Weka APIs.</p>
 </div>
 <div class="paragraph">
-<p>The <a href="https://github.com/tdiesler/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/Dataset.java">Dataset</a>, which is the main entry point for everything, is a contextual
+<p>The <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/Dataset.java">Dataset</a>, which is the main entry point for everything, is a contextual
 mutable, non-thread-safe entity. It is the holder of <a href="https://weka.sourceforge.io/doc.stable-3-8/weka/core/Instances.html">Instances</a>,
 <a href="https://weka.sourceforge.io/doc.stable-3-8/weka/classifiers/Classifier.html">Classifier</a>, <a href="https://weka.sourceforge.io/doc.stable-3-8/weka/classifiers/Evaluation.html">Evaluation</a>.</p>
 </div>
@@ -1350,7 +1350,7 @@ and then return the primitive back to the Dataset such that the next step can se
 </div>
 </div>
 <div class="paragraph">
-<p>The <a href="https://github.com/tdiesler/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/ModelPersister.java">ModelPersister</a> is another example of a <code>Consumer&lt;Classifier&gt;</code>.
+<p>The <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/ModelPersister.java">ModelPersister</a> is another example of a <code>Consumer&lt;Classifier&gt;</code>.
 This time, defined externally rather than inline.</p>
 </div>
 <div class="listingblock">
@@ -1365,7 +1365,7 @@ This time, defined externally rather than inline.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <a href="https://github.com/tdiesler/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/NominalPredictor.java">NominalPredictor</a> is a good example of a <code>Function&lt;Dataset, Instances&gt;</code>.
+<p>The <a href="https://github.com/jboss-fuse/nessus-weka/tree/master/api/src/main/java/io/nessus/weka/NominalPredictor.java">NominalPredictor</a> is a good example of a <code>Function&lt;Dataset, Instances&gt;</code>.
 It accepts the <code>Dataset</code> so that it can get access to the <code>Classifier</code> and the <code>Instances</code> then does some number crunching
 and return new <code>Instances</code> that can then be passed on to the next step.</p>
 </div>
@@ -1718,13 +1718,13 @@ camelctx.start();</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://github.com/tdiesler/nessus-weka/issues" target="_blank" rel="noopener">Issue Tracker</a></p>
+<p><a href="https://github.com/jboss-fuse/nessus-weka/issues" target="_blank" rel="noopener">Issue Tracker</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tdiesler/nessus-weka/tree/master/docs/src/guide" target="_blank" rel="noopener">Documentation Sources</a></p>
+<p><a href="https://github.com/jboss-fuse/nessus-weka/tree/master/docs/src/guide" target="_blank" rel="noopener">Documentation Sources</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tdiesler/nessus-weka/tree/master/part01/src/test/java/io/nessus/weka/test/part01" target="_blank" rel="noopener">Example Code</a></p>
+<p><a href="https://github.com/jboss-fuse/nessus-weka/tree/master/part01/src/test/java/io/nessus/weka/test/part01" target="_blank" rel="noopener">Example Code</a></p>
 </li>
 </ul>
 </div>
@@ -1745,7 +1745,7 @@ camelctx.start();</code></pre>
 <p><a href="https://waikato.github.io/weka-wiki/documentation/" target="_blank" rel="noopener">Weka Documentation</a></p>
 </li>
 <li>
-<p><a href="https://github.com/tdiesler/nessus-weka" target="_blank" rel="noopener">Nessus-Weka</a></p>
+<p><a href="https://github.com/jboss-fuse/nessus-weka" target="_blank" rel="noopener">Nessus-Weka</a></p>
 </li>
 </ul>
 </div>
@@ -1755,7 +1755,7 @@ camelctx.start();</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 1.0.2-SNAPSHOT<br>
-Last updated 2020-01-31 18:11:24 CET
+Last updated 2020-02-04 13:52:11 CET
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
