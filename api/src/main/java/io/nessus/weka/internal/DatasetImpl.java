@@ -58,13 +58,13 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     private Instances instances;
 
     public DatasetImpl(Instances instances) {
-        this.instances = asignClassIndex(instances);
+        this.instances = assignClassIndex(instances);
     }
 
     /**
      * Guess the class index if not set already
      */
-    private Instances asignClassIndex(Instances instances) {
+    private Instances assignClassIndex(Instances instances) {
         AssertArg.notNull(instances, "Null instances");
         
         if (instances.classIndex() < 0) {
@@ -73,9 +73,11 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
                 instances.setClass(attr);
             } else {
                 int numatts = instances.numAttributes();
-                attr = instances.attribute(numatts - 1);
-                if (attr.isNominal()) {
-                    instances.setClass(attr);
+                if (numatts > 0) {
+                    attr = instances.attribute(numatts - 1);
+                    if (attr.isNominal()) {
+                        instances.setClass(attr);
+                    }
                 }
             }
         }
@@ -85,21 +87,21 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     @Override
     public Dataset read(Path inpath) {
         Instances result = DatasetUtils.read(inpath);
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(String inpath) {
         Instances result = DatasetUtils.read(Paths.get(inpath));
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset read(URL url) {
         Instances result = DatasetUtils.read(url);
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
     
@@ -161,28 +163,28 @@ public class DatasetImpl extends Dataset implements FunctionalEvaluation<Dataset
     public Dataset pop(String name) {
         Instances result = storage.remove(name);
         AssertState.notNull(result, "Cannot find instances with name '" + name + "' on stack");
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
 
     @Override
     public Dataset apply(String filterSpec) {
         Instances result = DatasetUtils.applyFilter(getInstances(), filterSpec);
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset applyToInstances(UnaryOperator<Instances> operator) {
         Instances result = operator.apply(instances);
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
     
     @Override
     public Dataset applyToInstances(Function<Dataset, Instances> function) {
         Instances result = function.apply(this);
-        instances = asignClassIndex(result);
+        instances = assignClassIndex(result);
         return this;
     }
 

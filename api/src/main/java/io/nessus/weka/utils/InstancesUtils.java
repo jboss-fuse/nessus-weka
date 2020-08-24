@@ -17,20 +17,26 @@
  * limitations under the License.
  * #L%
  */
-package io.nessus.weka;
+package io.nessus.weka.utils;
 
-@SuppressWarnings("serial")
-public class UncheckedException extends RuntimeException {
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
-    public static RuntimeException create(Throwable cause) {
-        
-    	if (cause instanceof RuntimeException) 
-        	return (RuntimeException) cause;
-    	
-        return new UncheckedException(cause);
+import weka.core.Attribute;
+import weka.core.Instances;
+
+public class InstancesUtils {
+
+    // Hide ctor
+    private InstancesUtils() {
     }
     
-    private UncheckedException(Throwable cause) {
-        super(cause.getMessage(), cause);
+    public static List<Attribute> attributes(Instances instances) {
+    	List<Attribute> atts = new ArrayList<>();
+    	Enumeration<Attribute> en = instances.enumerateAttributes();
+    	while (en.hasMoreElements()) atts.add(en.nextElement());
+        return atts;
     }
+    
 }
