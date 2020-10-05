@@ -37,8 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.nessus.weka.AssertArg;
-import io.nessus.weka.AssertState;
+import io.nessus.common.AssertArg;
+import io.nessus.common.AssertState;
 import io.nessus.weka.UncheckedException;
 import weka.classifiers.Classifier;
 import weka.core.Instances;

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package io.nessus.weka.test.part01;
+package io.nessus.test.weka.part01;
 
 import org.junit.Assert;
 import org.junit.Test;

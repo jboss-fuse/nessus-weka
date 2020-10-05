@@ -33,8 +33,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import io.nessus.weka.AssertArg;
-import io.nessus.weka.AssertState;
+import io.nessus.common.AssertArg;
+import io.nessus.common.AssertState;
 import io.nessus.weka.Dataset;
 import io.nessus.weka.FunctionalClassifier;
 import io.nessus.weka.FunctionalEvaluation;

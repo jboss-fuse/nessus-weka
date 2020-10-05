@@ -33,7 +33,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nessus.weka.camel;
+package io.nessus.test.weka.camel;
 
 import java.io.InputStream;
 import java.net.URL;

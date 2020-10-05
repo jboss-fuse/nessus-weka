@@ -23,9 +23,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import io.nessus.weka.LogSupport;
+import io.nessus.common.testing.AbstractTest;
 
-public class AbstractWekaTest extends LogSupport {
+public class AbstractWekaTest extends AbstractTest {
 	
     protected Path getOutPath() {
         return Paths.get("target");

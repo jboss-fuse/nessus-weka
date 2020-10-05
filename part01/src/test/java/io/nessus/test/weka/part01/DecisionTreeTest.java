@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package io.nessus.weka.test.part01;
+package io.nessus.test.weka.part01;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,25 +26,24 @@ import io.nessus.weka.Dataset;
 import io.nessus.weka.testing.AbstractWekaTest;
 import weka.classifiers.Evaluation;
 
-public class ZeroRTest extends AbstractWekaTest {
+public class DecisionTreeTest extends AbstractWekaTest {
     
     @Test
-    public void testZeroR() throws Exception {
+    public void testJ48() throws Exception {
         
-        Dataset dataset = Dataset.create("data/sfny.arff");
+        Evaluation eval = Dataset.create("data/sfny.arff")
         
-        Evaluation eval = dataset
-        
-            .buildClassifier("ZeroR")
-            
-            .consumeClassifier(cl -> logInfo("{}", cl))
-        
-            .evaluateModel(dataset)
-            
-            .getEvaluation();
-        
+                .buildClassifier("J48")
+                
+                .consumeClassifier(cl -> logInfo("{}", cl))
+                
+                .crossValidateModel(10, 1)
+                
+                .getEvaluation();
+                
         logInfo("{}", eval.toSummaryString(false)); 
         
-        Assert.assertEquals("54.4715", String.format("%.4f", eval.pctCorrect()));
+        Assert.assertEquals("85.3659", String.format("%.4f", eval.pctCorrect()));
+
     }
 }

@@ -21,6 +21,7 @@ package io.nessus.weka;
 
 import java.util.function.Function;
 
+import io.nessus.common.AssertState;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instance;

@@ -13,7 +13,10 @@
     <name>Nessus :: Weka :: API</name>
 
     <dependencies>
-        
+        <dependency>
+            <groupId>io.nessus</groupId>
+            <artifactId>nessus-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-stable</artifactId>

@@ -21,9 +21,10 @@
     
     <properties>
         <version.apache.camel>3.1.0</version.apache.camel>
-        <version.waikato.weka>3.8.4</version.waikato.weka>
         <version.junit>4.11</version.junit>
+        <version.nessus.common>1.0.0</version.nessus.common>
         <version.slf4j>1.7.28</version.slf4j>
+        <version.waikato.weka>3.8.4</version.waikato.weka>
         
         <!-- Plugin versions -->
         <version-asciidoctor-maven-plugin>1.5.7.1</version-asciidoctor-maven-plugin>
@@ -33,7 +34,7 @@
         <version-maven-assembly-plugin>3.1.0</version-maven-assembly-plugin>
         <version-maven-compiler-plugin>3.1</version-maven-compiler-plugin>
         <version-maven-jar-plugin>2.6</version-maven-jar-plugin>
-        <version-maven-javadoc-plugin>3.0.1</version-maven-javadoc-plugin>
+        <version-maven-javadoc-plugin>3.2.0</version-maven-javadoc-plugin>
         <version-maven-release-plugin>2.5</version-maven-release-plugin>
         <version-maven-surefire-plugin>2.19.1</version-maven-surefire-plugin>
     </properties>
@@ -48,6 +49,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.nessus</groupId>
+                <artifactId>nessus-common</artifactId>
+                <version>${version.nessus.common}</version>
+            </dependency>
+            <dependency>
+                <groupId>nz.ac.waikato.cms.weka</groupId>
+                <artifactId>weka-stable</artifactId>
+                <version>${version.waikato.weka}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-core</artifactId>
                 <version>${version.apache.camel}</version>
@@ -57,11 +68,6 @@
                 <artifactId>camel-weka</artifactId>
                 <version>${version.apache.camel}</version>
             </dependency>
-			<dependency>
-			    <groupId>nz.ac.waikato.cms.weka</groupId>
-			    <artifactId>weka-stable</artifactId>
-			    <version>${version.waikato.weka}</version>
-			</dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -108,7 +114,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${version-maven-javadoc-plugin}</version>
                     <configuration>
-                        <additionalparam>-Xdoclint:none</additionalparam>
+                        <doclint>none</doclint>
                         <detectJavaApiLink>false</detectJavaApiLink>
                         <detectOfflineLinks>false</detectOfflineLinks>
                         <detectLinks>false</detectLinks>

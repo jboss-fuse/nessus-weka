@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package io.nessus.weka.test.part01;
+package io.nessus.test.weka;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

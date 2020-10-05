@@ -33,12 +33,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nessus.weka.camel;
+package io.nessus.test.weka.camel;
 
-import io.nessus.weka.AssertArg;
-import io.nessus.weka.Dataset;
-import io.nessus.weka.NominalPredictor;
-import io.nessus.weka.testing.AbstractWekaTest;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Exchange;
@@ -47,6 +43,11 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.Assert;
 import org.junit.Test;
+
+import io.nessus.common.AssertArg;
+import io.nessus.weka.Dataset;
+import io.nessus.weka.NominalPredictor;
+import io.nessus.weka.testing.AbstractWekaTest;
 import weka.core.Instances;
 
 public class PredictionTest extends AbstractWekaTest {
